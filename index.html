@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>Monthly Expense Tracker</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
@@ -45,12 +45,17 @@
     .status-green { color: #198754; }
     .status-orange { color: #fd7e14; }
     .status-red { color: #dc3545; }
+    @media (max-width: 576px) {
+      h1#headerTitle { font-size: 1.5rem; }
+      .card { margin: 0.5rem 0; }
+      .table-responsive { font-size: 0.9rem; }
+    }
   </style>
 </head>
 <body>
-  <div class="container py-4">
+  <div class="container-fluid py-3 px-2">
     <h1 id="headerTitle"></h1>
-    <ul class="nav nav-tabs" id="mainTab" role="tablist">
+    <ul class="nav nav-tabs mb-3" id="mainTab" role="tablist">
       <li class="nav-item">
         <button class="nav-link active btn-gradient" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tracker" type="button">Tracker</button>
       </li>
@@ -58,134 +63,119 @@
         <button class="nav-link btn-gradient" id="archive-tab" data-bs-toggle="tab" data-bs-target="#archive" type="button">Archive</button>
       </li>
     </ul>
-    <div class="tab-content mt-3">
-      <!-- Tracker Tab -->
+    <div class="tab-content">
       <div class="tab-pane fade show active" id="tracker">
-        <!-- Section 1: Budget & Summary -->
         <div class="card p-3">
           <h5>Budget & Summary</h5>
-          <div class="d-flex justify-content-between align-items-center">
+          <div class="d-flex flex-wrap justify-content-between align-items-center">
             <div>
               <h6>Budget: ₹<span id="budgetDisplay">0</span></h6>
               <h6>Total Spent: <span id="spentDisplay">0</span></h6>
               <h6>Remaining: ₹<span id="remainingDisplay">0</span></h6>
             </div>
-            <button id="resetBudgetBtn" class="btn btn-gradient">Set Budget</button>
+            <button id="resetBudgetBtn" class="btn btn-gradient mt-2 mt-sm-0">Set Budget</button>
           </div>
         </div>
-        <!-- Section: Add Expense -->
         <div class="card p-3">
           <h5>Add Expense</h5>
-          <form id="expenseForm" class="row g-3">
-            <div class="col-md-3">
+          <form id="expenseForm" class="row g-2">
+            <div class="col-12 col-sm-6 col-md-3">
               <label class="form-label">Category</label>
               <select id="category" class="form-select">
-                <option>Grocery</option>
-                <option>Bills</option>
-                <option>Online shopping</option>
-                <option>Travelling</option>
-                <option>Food</option>
-                <option>Medical expenses</option>
-                <option>Debt</option>
-                <option>Petrol</option>
-                <option>Home expenses other than grocery</option>
-                <option>Maintenance</option>
-                <option>EMI</option>
-                <option>Investment</option>
-                <option>Entertainment</option>
-                <option>Others</option>
+                <option>Grocery</option><option>Bills</option><option>Online shopping</option><option>Travelling</option>
+                <option>Food</option><option>Medical expenses</option><option>Debt</option><option>Petrol</option>
+                <option>Home expenses other than grocery</option><option>Maintenance</option><option>EMI</option>
+                <option>Investment</option><option>Entertainment</option><option>Others</option>
               </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-12 col-sm-6 col-md-2">
               <label class="form-label">Vendor</label>
               <input type="text" id="vendor" class="form-control" required>
             </div>
-            <div class="col-md-2">
+            <div class="col-12 col-sm-6 col-md-2">
               <label class="form-label">Amount (₹)</label>
               <input type="number" id="amount" class="form-control" required min="0.01" step="0.01">
             </div>
-            <div class="col-md-3">
+            <div class="col-12 col-sm-6 col-md-3">
               <label class="form-label">Note</label>
               <input type="text" id="note" class="form-control">
             </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button type="submit" class="btn btn-success w-100">Add</button>
+            <div class="col-12 col-sm-12 col-md-2 d-grid">
+              <button type="submit" class="btn btn-success">Add</button>
             </div>
           </form>
         </div>
-        <!-- Section 2: Top 3 Summaries -->
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-12 col-md-6">
             <div class="card p-3">
               <h5>Top 3 Categories</h5>
-              <table class="table table-sm">
+              <div class="table-responsive"><table class="table table-sm">
                 <thead><tr><th>Rank</th><th>Category</th><th>Amount</th><th>%</th></tr></thead>
                 <tbody id="topCategories"></tbody>
-              </table>
+              </table></div>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-12 col-md-6">
             <div class="card p-3">
               <h5>Top 3 Vendors</h5>
-              <table class="table table-sm">
+              <div class="table-responsive"><table class="table table-sm">
                 <thead><tr><th>Rank</th><th>Vendor</th><th>Amount</th><th>%</th></tr></thead>
                 <tbody id="topVendors"></tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         </div>
-        <!-- Section 3: Time Summaries -->
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-12 col-md-6">
             <div class="card p-3">
               <h5>Weekly Summary</h5>
-              <table class="table table-sm">
+              <div class="table-responsive"><table class="table table-sm">
                 <thead><tr><th>Week</th><th>Period</th><th>Total Spent</th></tr></thead>
                 <tbody id="weeklySummary"></tbody>
-              </table>
+              </table></div>
             </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-12 col-md-6">
             <div class="card p-3">
               <h5>Monthly Summary</h5>
-              <table class="table table-sm">
+              <div class="table-responsive"><table class="table table-sm">
                 <thead><tr><th>Month</th><th>Total Spent</th><th>Top Category</th><th>%</th></tr></thead>
                 <tbody id="monthlySummary"></tbody>
-              </table>
+              </table></div>
             </div>
           </div>
         </div>
-        <!-- Section 4: Recent Expenses Filter -->
         <div class="card p-3 filter-section">
           <h5>Filter Recent Expenses</h5>
-          <div class="d-flex flex-wrap align-items-end">
-            <div class="me-3">
+          <form class="row g-2 align-items-end" onsubmit="return false;">
+            <div class="col-6 col-sm-4">
               <label class="form-label">Start Date</label>
               <input type="date" id="startDate" class="form-control">
             </div>
-            <div class="me-3">
+            <div class="col-6 col-sm-4">
               <label class="form-label">End Date</label>
               <input type="date" id="endDate" class="form-control">
             </div>
-            <button id="filterBtn" class="btn btn-gradient me-2">Filter</button>
-            <button id="clearFilterBtn" class="btn btn-secondary">Clear</button>
-          </div>
+            <div class="col-12 col-sm-4 d-flex gap-2">
+              <button id="filterBtn" class="btn btn-gradient flex-fill">Filter</button>
+              <button id="clearFilterBtn" class="btn btn-secondary flex-fill">Clear</button>
+            </div>
+          </form>
         </div>
-        <!-- Section 4: Recent Expenses -->
         <div class="card p-3">
           <h5>Recent Expenses</h5>
-          <table class="table table-sm">
-            <thead><tr><th>Id</th><th>Date</th><th>Time</th><th>Category</th><th>Vendor</th><th>Note</th><th>Amount</th><th>Actions</th></tr></thead>
+          <div class="table-responsive"><table class="table table-sm">
+            <thead>
+              <tr><th>Id</th><th>Date</th><th>Time</th><th>Category</th><th>Vendor</th><th>Note</th><th>Amount</th><th>Modify</th><th>Delete</th></tr>
+            </thead>
             <tbody id="expenseList"></tbody>
-          </table>
+          </table></div>
         </div>
-        <!-- Export Buttons -->
-        <div class="mt-3 text-end">
-          <button id="exportCsvBtn" class="btn btn-outline-success me-2">Download CSV</button>
+        <div class="d-flex justify-content-end gap-2 mb-4">
+          <button id="exportCsvBtn" class="btn btn-outline-success">Download CSV</button>
           <button id="exportPdfBtn" class="btn btn-outline-danger">Download PDF</button>
         </div>
       </div>
-      <!-- Archive Tab -->
       <div class="tab-pane fade" id="archive">
         <div id="archiveList" class="accordion"></div>
       </div>
@@ -264,12 +254,7 @@
       const amount = parseFloat(document.getElementById('amount').value);
       const note = document.getElementById('note').value;
       const now = new Date();
-      const exp = {
-        id: Date.now(),
-        date: now.toLocaleDateString('en-GB'),
-        time: now.toLocaleTimeString('en-GB'),
-        category, vendor, note, amount
-      };
+      const exp = { id: Date.now(), date: now.toLocaleDateString('en-GB'), time: now.toLocaleTimeString('en-GB'), category, vendor, note, amount };
       const arr = loadExpenses(monthKey);
       arr.push(exp);
       saveExpenses(monthKey, arr);
@@ -284,63 +269,54 @@
 
       const spentEl = document.getElementById('spentDisplay');
       spentEl.textContent = spent.toFixed(2);
-      spentEl.className =
-        spent > budget * 0.9 ? 'status-red' :
-        spent > budget * 0.5 ? 'status-orange' :
-        'status-green';
+      spentEl.className = spent > budget * 0.9 ? 'status-red' : spent > budget * 0.5 ? 'status-orange' : 'status-green';
       document.getElementById('remainingDisplay').textContent = remaining.toFixed(2);
 
       // Top 3 categories
-      const catBody = document.getElementById('topCategories');
-      catBody.innerHTML = '';
       const catMap = {};
       arr.forEach(e => catMap[e.category] = (catMap[e.category]||0) + e.amount);
-      Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0,3)
-        .forEach(([cat,amt],i) => {
-          const perc = ((amt/spent*100)||0).toFixed(1) + '%';
-          catBody.innerHTML += `<tr><td>${i+1}</td><td>${cat}</td><td>₹${amt.toFixed(2)}</td><td>${perc}</td></tr>`;
-        });
+      const topCats = Object.entries(catMap).map(([k,v])=>({k,v})).sort((a,b)=>b.v-a.v).slice(0,3);
+      const catBody = document.getElementById('topCategories'); catBody.innerHTML = '';
+      topCats.forEach((item,i) => {
+        const perc = ((item.v/spent*100)||0).toFixed(1) + '%';
+        catBody.innerHTML += `<tr><td>${i+1}</td><td>${item.k}</td><td>₹${item.v.toFixed(2)}</td><td>${perc}</td></tr>`;
+      });
 
       // Top 3 vendors
-      const venBody = document.getElementById('topVendors');
-      venBody.innerHTML = '';
       const venMap = {};
       arr.forEach(e => venMap[e.vendor] = (venMap[e.vendor]||0) + e.amount);
-      Object.entries(venMap).sort((a,b) => b[1]-a[1]).slice(0,3)
-        .forEach(([ven,amt],i) => {
-          const perc = ((amt/spent*100)||0).toFixed(1) + '%';
-          venBody.innerHTML += `<tr><td>${i+1}</td><td>${ven}</td><td>₹${amt.toFixed(2)}</td><td>${perc}</td></tr>`;
-        });
+      const topVens = Object.entries(venMap).map(([k,v])=>({k,v})).sort((a,b)=>b.v-a.v).slice(0,3);
+      const venBody = document.getElementById('topVendors'); venBody.innerHTML = '';
+      topVens.forEach((item,i) => {
+        const perc = ((item.v/spent*100)||0).toFixed(1) + '%';
+        venBody.innerHTML += `<tr><td>${i+1}</td><td>${item.k}</td><td>₹${item.v.toFixed(2)}</td><td>${perc}</td></tr>`;
+      });
 
       // Weekly summary
-      const weeklyBody = document.getElementById('weeklySummary');
-      weeklyBody.innerHTML = '';
+      const weeklyBody = document.getElementById('weeklySummary'); weeklyBody.innerHTML = '';
       for (let w=1; w<=5; w++) {
         const start = (w-1)*7 + 1;
         const end = w*7;
-        const sumW = arr.filter(e => {
-          const day = parseInt(e.date.split('/')[0]);
-          return day >= start && day <= end;
-        }).reduce((s,e) => s + e.amount, 0);
+        const sumW = arr.filter(e => parseInt(e.date.split('/')[0]) >= start && parseInt(e.date.split('/')[0]) <= end)
+                         .reduce((s,e) => s + e.amount, 0);
         if (sumW>0 || start <= new Date().getDate()) {
           weeklyBody.innerHTML += `<tr><td>${w}</td><td>${start}-${end}</td><td>₹${sumW.toFixed(2)}</td></tr>`;
         }
       }
 
       // Monthly summary
-      const monBody = document.getElementById('monthlySummary');
-      monBody.innerHTML = '';
-      Object.keys(localStorage).filter(k => k.startsWith('expenses_')).sort().reverse()
-        .forEach(k => {
-          const key = k.split('_')[1];
-          const expArr = loadExpenses(key);
-          const sumM = expArr.reduce((s,e) => s + e.amount, 0);
-          const cm = {}; expArr.forEach(e=> cm[e.category] = (cm[e.category]||0)+e.amount);
-          const [topCat,topAmt] = Object.entries(cm).sort((a,b)=>b[1]-a[1])[0]||['-',0];
-          const monthName = new Date(key.slice(2), parseInt(key.slice(0,2))-1)
-            .toLocaleString('en-GB',{month:'short'});
-          monBody.innerHTML += `<tr><td>${monthName}</td><td>₹${sumM.toFixed(2)}</td><td>${topCat}</td><td>${topAmt?((topAmt/sumM*100).toFixed(1)+'%'):'-'}</td></tr>`;
-        });
+      const monBody = document.getElementById('monthlySummary'); monBody.innerHTML = '';
+      Object.keys(localStorage).filter(k=>k.startsWith('expenses_')).sort().reverse().forEach(k => {
+        const key = k.split('_')[1];
+        const expArr = loadExpenses(key);
+        const sumM = expArr.reduce((s,e) => s + e.amount,0);
+        const cm = {};
+        expArr.forEach(e => cm[e.category] = (cm[e.category]||0) + e.amount);
+        const [topCat, topAmt] = Object.entries(cm).sort((a,b)=>b[1]-a[1])[0] || ['-',0];
+        const monthName = new Date(key.slice(2), parseInt(key.slice(0,2))-1)
+                            .toLocaleString('en-GB',{month:'short'});
+        monBody.innerHTML += `<tr><td>${monthName}</td><td>₹${sumM.toFixed(2)}</td><td>${topCat}</td><td>${topAmt?((topAmt/sumM*100).toFixed(1)+'%'):'-'}</td></tr>`;
+      });
 
       renderExpenseList();
       renderArchive();
@@ -348,30 +324,30 @@
 
     function renderExpenseList() {
       const arr = loadExpenses(monthKey);
-      const body = document.getElementById('expenseList');
-      body.innerHTML = '';
-      const list = arr.filter(e => {
+      const body = document.getElementById('expenseList'); body.innerHTML = '';
+      arr.filter(e => {
         const [d,m,y] = e.date.split('/');
         const dateStr = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
         if (filterStart && dateStr < filterStart) return false;
         if (filterEnd && dateStr > filterEnd) return false;
         return true;
-      });
-      list.forEach(e => {
+      }).forEach(e => {
         body.innerHTML +=
-          `<tr><td>${e.id}</td><td>${e.date}</td><td>${e.time}</td><td>${e.category}</td>`+
-          `<td>${e.vendor}</td><td>${e.note}</td><td>₹${e.amount.toFixed(2)}</td>`+
-          `<td><button class="btn btn-sm btn-warning me-1" onclick="editExpense(${e.id})">✎</button>`+
-          `<button class="btn btn-sm btn-danger" onclick="deleteExpense(${e.id})">✗</button></td></tr>`;
+          `<tr>` +
+          `<td>${e.id}</td><td>${e.date}</td><td>${e.time}</td><td>${e.category}</td>` +
+          `<td>${e.vendor}</td><td>${e.note}</td><td>₹${e.amount.toFixed(2)}</td>` +
+          `<td><button class="btn btn-sm btn-warning w-100 mb-1" onclick="editExpense(${e.id})">Modify</button></td>` +
+          `<td><button class="btn btn-sm btn-danger w-100" onclick="deleteExpense(${e.id})">Delete</button></td>` +
+          `</tr>`;
       });
     }
 
-    document.getElementById('filterBtn').addEventListener('click', ()=>{
+    document.getElementById('filterBtn').addEventListener('click', () => {
       filterStart = document.getElementById('startDate').value;
       filterEnd = document.getElementById('endDate').value;
       renderExpenseList();
     });
-    document.getElementById('clearFilterBtn').addEventListener('click', ()=>{
+    document.getElementById('clearFilterBtn').addEventListener('click', () => {
       filterStart = '';
       filterEnd = '';
       document.getElementById('startDate').value = '';
@@ -395,32 +371,32 @@
       deleteExpense(id);
     }
 
-    document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
       const arr = loadExpenses(monthKey);
       const csv = Papa.unparse(arr);
-      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url;
       a.download = `expenses_${monthKey}.csv`; a.click();
       URL.revokeObjectURL(url);
     });
-    document.getElementById('exportPdfBtn').addEventListener('click', ()=>{
+    document.getElementById('exportPdfBtn').addEventListener('click', () => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const arr = loadExpenses(monthKey);
       const cols = ["Id","Date","Time","Category","Vendor","Note","Amount"];
-      const rows = arr.map(e=>[e.id,e.date,e.time,e.category,e.vendor,e.note,e.amount.toFixed(2)]);
+      const rows = arr.map(e => [e.id,e.date,e.time,e.category,e.vendor,e.note,e.amount.toFixed(2)]);
       doc.autoTable({ head: [cols], body: rows });
       doc.save(`expenses_${monthKey}.pdf`);
     });
 
     function renderArchive() {
       const acc = document.getElementById('archiveList'); acc.innerHTML = '';
-      const keys = Object.keys(localStorage).filter(k=>k.startsWith('expenses_')).sort().reverse();
-      keys.forEach((k,i)=>{
-        const key = k.split('_')[1]; if(key===monthKey) return;
+      const keys = Object.keys(localStorage).filter(k => k.startsWith('expenses_')).sort().reverse();
+      keys.forEach((k,i) => {
+        const key = k.split('_')[1]; if (key === monthKey) return;
         const expArr = loadExpenses(key);
-        const [mm,yyyy] = [key.slice(0,2), key.slice(2)];
+        const mm = key.slice(0,2), yyyy = key.slice(2);
         const title = new Date(yyyy, mm-1).toLocaleString('en-GB',{month:'long',year:'numeric'});
         acc.innerHTML +=
           `<div class="accordion-item">`+
@@ -430,39 +406,4 @@
             `<div id="acc${i}" class="accordion-collapse collapse" data-bs-parent="#archiveList">`+
               `<div class="accordion-body">`+
                 `<button class="btn btn-sm btn-outline-success mb-2" onclick="downloadCsvArchive('${key}')">CSV</button>`+
-                `<button class="btn btn-sm btn-outline-danger mb-2" onclick="downloadPdfArchive('${key}')">PDF</button>`+
-                `<table class="table table-sm"><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th></tr></thead><tbody>`+
-                expArr.map(e=>`<tr><td>${e.date}</td><td>${e.category}</td><td>${e.vendor}</td><td>₹${e.amount.toFixed(2)}</td></tr>`).join('')+
-                `</tbody></table>`+
-              `</div>`+
-            `</div>`+
-          `</div>`;
-      });
-    }
-    function downloadCsvArchive(key) {
-      const arr = loadExpenses(key);
-      const csv = Papa.unparse(arr);
-      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url;
-      a.download = `expenses_${key}.csv`; a.click();
-      URL.revokeObjectURL(url);
-    }
-    function downloadPdfArchive(key) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const arr = loadExpenses(key);
-      const cols = ["Date","Category","Vendor","Amount"];
-      const rows = arr.map(e=>[e.date,e.category,e.vendor,e.amount.toFixed(2)]);
-      doc.autoTable({ head: [cols], body: rows });
-      doc.save(`expenses_${key}.pdf`);
-    }
-
-    document.getElementById('expenseForm').addEventListener('submit', addExpense);
-    document.getElementById('resetBudgetBtn').addEventListener('click', promptBudget);
-
-    loadBudget();
-    renderDashboard();
-  </script>
-</body>
-</html>
+                `<button class="btn btn-sm btn-outline-danger mb-2" onclick="downloadPdf
