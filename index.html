@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monthly Expense Tracker</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; }
+    .nav-tabs .nav-link.active { background-color: #e9ecef; }
+    .card { margin-bottom: 1rem; }
+    .status-green { color: #198754; }
+    .status-orange { color: #fd7e14; }
+    .status-red { color: #dc3545; }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <h1 class="mb-4 text-center">Monthly Expense Tracker</h1>
+    <ul class="nav nav-tabs" id="mainTab" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tracker" type="button">Tracker</button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" id="archive-tab" data-bs-toggle="tab" data-bs-target="#archive" type="button">Archive</button>
+      </li>
+    </ul>
+    <div class="tab-content mt-3">
+      <!-- Tracker Tab -->
+      <div class="tab-pane fade show active" id="tracker">
+        <!-- Section 1: Budget & Summary -->
+        <div class="card p-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h5>Budget: ₹<span id="budgetDisplay">0</span></h5>
+              <h5>Total Spent: <span id="spentDisplay">0</span></h5>
+              <h5>Remaining: ₹<span id="remainingDisplay">0</span></h5>
+            </div>
+            <button id="resetBudgetBtn" class="btn btn-primary">Set Budget</button>
+          </div>
+        </div>
+        <!-- Section: Add Expense -->
+        <div class="card p-3">
+          <h5>Add Expense</h5>
+          <form id="expenseForm" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Category</label>
+              <select id="category" class="form-select">
+                <option>Grocery</option>
+                <option>Bills</option>
+                <option>Online shopping</option>
+                <option>Travelling</option>
+                <option>Food</option>
+                <option>Medical expenses</option>
+                <option>Debt</option>
+                <option>Petrol</option>
+                <option>Home expenses other than grocery</option>
+                <option>Maintenance</option>
+                <option>EMI</option>
+                <option>Investment</option>
+                <option>Entertainment</option>
+                <option>Others</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Vendor</label>
+              <input type="text" id="vendor" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Amount (₹)</label>
+              <input type="number" id="amount" class="form-control" required min="0.01" step="0.01">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Note</label>
+              <input type="text" id="note" class="form-control">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button type="submit" class="btn btn-success w-100">Add</button>
+            </div>
+          </form>
+        </div>
+        <!-- Section 2: Top 3 Summaries -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5>Top 3 Categories</h5>
+              <table class="table table-sm">
+                <thead><tr><th>Rank</th><th>Category</th><th>Amount</th><th>%</th></tr></thead>
+                <tbody id="topCategories"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5>Top 3 Vendors</h5>
+              <table class="table table-sm">
+                <thead><tr><th>Rank</th><th>Vendor</th><th>Amount</th><th>%</th></tr></thead>
+                <tbody id="topVendors"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- Section 3: Time Summaries -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5>Weekly Summary</h5>
+              <table class="table table-sm">
+                <thead><tr><th>Week</th><th>Period</th><th>Total Spent</th></tr></thead>
+                <tbody id="weeklySummary"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card p-3">
+              <h5>Monthly Summary</h5>
+              <table class="table table-sm">
+                <thead><tr><th>Month</th><th>Total Spent</th><th>Top Category</th><th>%</th></tr></thead>
+                <tbody id="monthlySummary"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- Section 4: Recent Expenses -->
+        <div class="card p-3">
+          <h5>Recent Expenses</h5>
+          <div class="d-flex mb-2">
+            <input type="date" id="filterDate" class="form-control me-2">
+            <button id="filterBtn" class="btn btn-outline-primary">Filter</button>
+            <button id="clearFilterBtn" class="btn btn-outline-secondary ms-2">Clear</button>
+          </div>
+          <table class="table table-sm">
+            <thead><tr><th>Id</th><th>Date</th><th>Time</th><th>Category</th><th>Vendor</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody id="expenseList"></tbody>
+          </table>
+        </div>
+        <!-- Export Buttons -->
+        <div class="mt-3 text-end">
+          <button id="exportCsvBtn" class="btn btn-outline-success me-2">Download CSV</button>
+          <button id="exportPdfBtn" class="btn btn-outline-danger">Download PDF</button>
+        </div>
+      </div>
+      <!-- Archive Tab -->
+      <div class="tab-pane fade" id="archive">
+        <div id="archiveList" class="accordion"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    // Utility to get key for month-year
+    function getMonthKey(date) {
+      const m = date.getMonth() + 1;
+      const y = date.getFullYear();
+      return `${m.toString().padStart(2, '0')}${y}`;
+    }
+    const monthKey = getMonthKey(new Date());
+    let budget = 0;
+    
+    // Load or reset budget on new month
+    function loadBudget() {
+      const storedMonth = localStorage.getItem('budgetMonth');
+      const storedYear = localStorage.getItem('budgetYear');
+      const now = new Date();
+      if (parseInt(storedMonth) !== now.getMonth() + 1 || parseInt(storedYear) !== now.getFullYear()) {
+        if (confirm('New month detected. Reset budget?')) {
+          promptBudget();
+        } else {
+          // Carry over previous budget but update month markers
+          localStorage.setItem('budgetMonth', now.getMonth() + 1);
+          localStorage.setItem('budgetYear', now.getFullYear());
+          const b = localStorage.getItem('budget') || '2000';
+          budget = parseFloat(b);
+        }
+      } else {
+        const b = localStorage.getItem('budget') || '2000';
+        budget = parseFloat(b);
+      }
+      updateBudgetDisplay();
+    }
+
+    function promptBudget() {
+      const inp = prompt('Enter monthly budget in ₹:', '2000');
+      budget = parseFloat(inp) || 2000;
+      localStorage.setItem('budget', budget);
+      const now = new Date();
+      localStorage.setItem('budgetMonth', now.getMonth() + 1);
+      localStorage.setItem('budgetYear', now.getFullYear());
+      updateBudgetDisplay();
+    }
+
+    function updateBudgetDisplay() {
+      document.getElementById('budgetDisplay').textContent = budget.toFixed(2);
+      renderDashboard();
+    }
+
+    // Expenses storage
+    function loadExpenses(key) {
+      const data = localStorage.getItem(`expenses_${key}`);
+      return data ? JSON.parse(data) : [];
+    }
+    function saveExpenses(key, arr) {
+      localStorage.setItem(`expenses_${key}`, JSON.stringify(arr));
+    }
+
+    // Add expense
+    function addExpense(e) {
+      e.preventDefault();
+      const category = document.getElementById('category').value;
+      const vendor = document.getElementById('vendor').value;
+      const amount = parseFloat(document.getElementById('amount').value);
+      const note = document.getElementById('note').value;
+      const now = new Date();
+      const exp = {
+        id: Date.now(),
+        date: now.toLocaleDateString('en-GB'),
+        time: now.toLocaleTimeString('en-GB'),
+        category, vendor, amount, note
+      };
+      const arr = loadExpenses(monthKey);
+      arr.push(exp);
+      saveExpenses(monthKey, arr);
+      e.target.reset();
+      renderDashboard();
+    }
+
+    // Render entire dashboard
+    function renderDashboard() {
+      const arr = loadExpenses(monthKey);
+      const spent = arr.reduce((sum, x) => sum + x.amount, 0);
+      const remaining = budget - spent;
+
+      const spentEl = document.getElementById('spentDisplay');
+      spentEl.textContent = spent.toFixed(2);
+      spentEl.className =
+        spent > budget * 0.9 ? 'status-red' :
+        spent > budget * 0.5 ? 'status-orange' :
+        'status-green';
+
+      document.getElementById('remainingDisplay').textContent = remaining.toFixed(2);
+
+      // Top 3 categories
+      const catMap = {};
+      arr.forEach(e => catMap[e.category] = (catMap[e.category]||0) + e.amount);
+      const topCats = Object.entries(catMap)
+        .map(([k,v]) => ({k,v}))
+        .sort((a,b) => b.v - a.v)
+        .slice(0,3);
+      const catBody = document.getElementById('topCategories');
+      catBody.innerHTML = '';
+      topCats.forEach((item,i) => {
+        const perc = ((item.v/spent*100)||0).toFixed(1) + '%';
+        catBody.innerHTML += `<tr><td>${i+1}</td><td>${item.k}</td><td>₹${item.v.toFixed(2)}</td><td>${perc}</td></tr>`;
+      });
+
+      // Top 3 vendors
+      const venMap = {};
+      arr.forEach(e => venMap[e.vendor] = (venMap[e.vendor]||0) + e.amount);
+      const topVens = Object.entries(venMap)
+        .map(([k,v]) => ({k,v}))
+        .sort((a,b) => b.v - a.v)
+        .slice(0,3);
+      const venBody = document.getElementById('topVendors');
+      venBody.innerHTML = '';
+      topVens.forEach((item,i) => {
+        const perc = ((item.v/spent*100)||0).toFixed(1) + '%';
+        venBody.innerHTML += `<tr><td>${i+1}</td><td>${item.k}</td><td>₹${item.v.toFixed(2)}</td><td>${perc}</td></tr>`;
+      });
+
+      // Weekly summary (7-day blocks from 1st)
+      const weeklyBody = document.getElementById('weeklySummary');
+      weeklyBody.innerHTML = '';
+      for (let w=1; w<=5; w++) {
+        const start = (w-1)*7 + 1;
+        const end = w*7;
+        const sumW = arr
+          .filter(e => parseInt(e.date.split('/')[0]) >= start && parseInt(e.date.split('/')[0]) <= end)
+          .reduce((s,e) => s + e.amount, 0);
+        if (sumW>0 || w <= Math.ceil(new Date().getDate()/7)) {
+          weeklyBody.innerHTML += `<tr><td>${w}</td><td>${start}-${end}</td><td>₹${sumW.toFixed(2)}</td></tr>`;
+        }
+      }
+
+      // Monthly summary across all stored months
+      const monBody = document.getElementById('monthlySummary');
+      monBody.innerHTML = '';
+      Object.keys(localStorage)
+        .filter(k => k.startsWith('expenses_'))
+        .sort().reverse()
+        .forEach(k => {
+          const key = k.split('_')[1];
+          const expArr = loadExpenses(key);
+          const sumM = expArr.reduce((s,e) => s + e.amount, 0);
+          const cm = {};
+          expArr.forEach(e => cm[e.category] = (cm[e.category]||0) + e.amount);
+          const top = Object.entries(cm).sort((a,b)=>b[1]-a[1])[0] || [];
+          const monthName = new Date(key.slice(2), parseInt(key.slice(0,2))-1)
+            .toLocaleString('en-GB',{month:'short'});
+          monBody.innerHTML +=
+            `<tr><td>${monthName}</td><td>₹${sumM.toFixed(2)}</td><td>${top[0]||'-'}</td><td>${top[1]?((top[1]/sumM*100).toFixed(1)+'%'):'-'}</td></tr>`;
+        });
+
+      // Recent expenses list
+      renderExpenseList();
+
+      // Archive
+      renderArchive();
+    }
+
+    // Recent list & filter
+    let currentFilter = '';
+    function renderExpenseList() {
+      const arr = loadExpenses(monthKey);
+      const body = document.getElementById('expenseList');
+      body.innerHTML = '';
+      const list = currentFilter
+        ? arr.filter(e => {
+            const [d,m,y] = e.date.split('/');
+            return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}` === currentFilter;
+          })
+        : arr;
+      list.forEach(e => {
+        body.innerHTML +=
+          `<tr><td>${e.id}</td><td>${e.date}</td><td>${e.time}</td><td>${e.category}</td>` +
+          `<td>${e.vendor}</td><td>₹${e.amount.toFixed(2)}</td>` +
+          `<td><button class="btn btn-sm btn-warning me-1" onclick="editExpense(${e.id})">✎</button>` +
+          `<button class="btn btn-sm btn-danger" onclick="deleteExpense(${e.id})">✗</button></td></tr>`;
+      });
+    }
+    document.getElementById('filterBtn').addEventListener('click',()=>{
+      currentFilter = document.getElementById('filterDate').value;
+      renderExpenseList();
+    });
+    document.getElementById('clearFilterBtn').addEventListener('click',()=>{
+      currentFilter = '';
+      document.getElementById('filterDate').value = '';
+      renderExpenseList();
+    });
+
+    // Edit & Delete
+    function deleteExpense(id) {
+      let arr = loadExpenses(monthKey).filter(x => x.id !== id);
+      saveExpenses(monthKey, arr);
+      renderDashboard();
+    }
+    function editExpense(id) {
+      const arr = loadExpenses(monthKey);
+      const exp = arr.find(x => x.id === id);
+      if (!exp) return;
+      document.getElementById('category').value = exp.category;
+      document.getElementById('vendor').value = exp.vendor;
+      document.getElementById('amount').value = exp.amount;
+      document.getElementById('note').value = exp.note;
+      deleteExpense(id);
+    }
+
+    // CSV & PDF Export
+    document.getElementById('exportCsvBtn').addEventListener('click',()=>{
+      const arr = loadExpenses(monthKey);
+      const csv = Papa.unparse(arr);
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = `expenses_${monthKey}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    });
+    document.getElementById('exportPdfBtn').addEventListener('click',()=>{
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const arr = loadExpenses(monthKey);
+      const cols = ["Id","Date","Time","Category","Vendor","Amount","Note"];
+      const rows = arr.map(e=>[e.id,e.date,e.time,e.category,e.vendor,e.amount.toFixed(2),e.note]);
+      doc.autoTable({ head: [cols], body: rows });
+      doc.save(`expenses_${monthKey}.pdf`);
+    });
+
+    document.getElementById('resetBudgetBtn').addEventListener('click', promptBudget);
+
+    // Archive rendering
+    function renderArchive() {
+      const acc = document.getElementById('archiveList');
+      acc.innerHTML = '';
+      const keys = Object.keys(localStorage)
+        .filter(k => k.startsWith('expenses_')).sort().reverse();
+      keys.forEach((k,i) => {
+        const key = k.split('_')[1];
+        if (key === monthKey) return;
+        const expArr = loadExpenses(key);
+        const mm = parseInt(key.slice(0,2))-1;
+        const yyyy = key.slice(2);
+        const title = new Date(yyyy,mm)
+          .toLocaleString('en-GB',{month:'long',year:'numeric'});
+        acc.innerHTML +=
+          `<div class="accordion-item">` +
+            `<h2 class="accordion-header">` +
+              `<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc${i}">` +
+                `${title} (${expArr.length} items)` +
+              `</button>` +
+            `</h2>` +
+            `<div id="acc${i}" class="accordion-collapse collapse" data-bs-parent="#archiveList">` +
+              `<div class="accordion-body">` +
+                `<button class="btn btn-sm btn-outline-success mb-2" onclick="downloadCsvArchive('${key}')">CSV</button>` +
+                `<button class="btn btn-sm btn-outline-danger mb-2" onclick="downloadPdfArchive('${key}')">PDF</button>` +
+                `<table class="table table-sm"><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th></tr></thead>` +
+                `<tbody>` + expArr.map(e=>
+                  `<tr><td>${e.date}</td><td>${e.category}</td><td>${e.vendor}</td><td>₹${e.amount.toFixed(2)}</td></tr>`
+                ).join('') +
+                `</tbody></table>` +
+              `</div>` +
+            `</div>` +
+          `</div>`;
+      });
+    }
+    function downloadCsvArchive(key) {
+      const arr = loadExpenses(key);
+      const csv = Papa.unparse(arr);
+      const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = `expenses_${key}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    }
+    function downloadPdfArchive(key) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const arr = loadExpenses(key);
+      const cols = ["Date","Category","Vendor","Amount"];
+      const rows = arr.map(e=>[e.date,e.category,e.vendor,e.amount.toFixed(2)]);
+      doc.autoTable({ head: [cols], body: rows });
+      doc.save(`expenses_${key}.pdf`);
+    }
+
+    // Init
+    document.getElementById('expenseForm').addEventListener('submit', addExpense);
+    loadBudget();
+    renderDashboard();
+  </script>
+</body>
+</html>
