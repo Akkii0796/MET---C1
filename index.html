@@ -9,9 +9,39 @@
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Roboto', sans-serif; background-color: #f8f9fa; }
-    .nav-tabs .nav-link.active { background-color: #e9ecef; }
-    .card { margin-bottom: 1rem; }
+    body { font-family: 'Roboto', sans-serif; background-color: #f2f9ff; }
+    h1#headerTitle { text-align: center; margin-bottom: 1.5rem; color: #0d6efd; }
+    .card {
+      border-left: 5px solid #0d6efd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
+    }
+    .card h5 {
+      display: inline-block;
+      background: linear-gradient(90deg, #0d6efd, #66b2ff);
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+      margin-bottom: 1rem;
+    }
+    table thead th {
+      background-color: #0d6efd;
+      color: white;
+    }
+    .filter-section {
+      background-color: #e3f2fd;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .btn-gradient {
+      background: linear-gradient(90deg, #0d6efd, #00d4ff);
+      color: white;
+      border: none;
+    }
+    .btn-gradient:hover {
+      background: linear-gradient(90deg, #0069d9, #00bfff);
+    }
     .status-green { color: #198754; }
     .status-orange { color: #fd7e14; }
     .status-red { color: #dc3545; }
@@ -19,13 +49,13 @@
 </head>
 <body>
   <div class="container py-4">
-    <h1 class="mb-4 text-center">Monthly Expense Tracker</h1>
+    <h1 id="headerTitle"></h1>
     <ul class="nav nav-tabs" id="mainTab" role="tablist">
       <li class="nav-item">
-        <button class="nav-link active" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tracker" type="button">Tracker</button>
+        <button class="nav-link active btn-gradient" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tracker" type="button">Tracker</button>
       </li>
       <li class="nav-item">
-        <button class="nav-link" id="archive-tab" data-bs-toggle="tab" data-bs-target="#archive" type="button">Archive</button>
+        <button class="nav-link btn-gradient" id="archive-tab" data-bs-toggle="tab" data-bs-target="#archive" type="button">Archive</button>
       </li>
     </ul>
     <div class="tab-content mt-3">
@@ -33,13 +63,14 @@
       <div class="tab-pane fade show active" id="tracker">
         <!-- Section 1: Budget & Summary -->
         <div class="card p-3">
+          <h5>Budget & Summary</h5>
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <h5>Budget: ₹<span id="budgetDisplay">0</span></h5>
-              <h5>Total Spent: <span id="spentDisplay">0</span></h5>
-              <h5>Remaining: ₹<span id="remainingDisplay">0</span></h5>
+              <h6>Budget: ₹<span id="budgetDisplay">0</span></h6>
+              <h6>Total Spent: <span id="spentDisplay">0</span></h6>
+              <h6>Remaining: ₹<span id="remainingDisplay">0</span></h6>
             </div>
-            <button id="resetBudgetBtn" class="btn btn-primary">Set Budget</button>
+            <button id="resetBudgetBtn" class="btn btn-gradient">Set Budget</button>
           </div>
         </div>
         <!-- Section: Add Expense -->
@@ -124,16 +155,27 @@
             </div>
           </div>
         </div>
+        <!-- Section 4: Recent Expenses Filter -->
+        <div class="card p-3 filter-section">
+          <h5>Filter Recent Expenses</h5>
+          <div class="d-flex flex-wrap align-items-end">
+            <div class="me-3">
+              <label class="form-label">Start Date</label>
+              <input type="date" id="startDate" class="form-control">
+            </div>
+            <div class="me-3">
+              <label class="form-label">End Date</label>
+              <input type="date" id="endDate" class="form-control">
+            </div>
+            <button id="filterBtn" class="btn btn-gradient me-2">Filter</button>
+            <button id="clearFilterBtn" class="btn btn-secondary">Clear</button>
+          </div>
+        </div>
         <!-- Section 4: Recent Expenses -->
         <div class="card p-3">
           <h5>Recent Expenses</h5>
-          <div class="d-flex mb-2">
-            <input type="date" id="filterDate" class="form-control me-2">
-            <button id="filterBtn" class="btn btn-outline-primary">Filter</button>
-            <button id="clearFilterBtn" class="btn btn-outline-secondary ms-2">Clear</button>
-          </div>
           <table class="table table-sm">
-            <thead><tr><th>Id</th><th>Date</th><th>Time</th><th>Category</th><th>Vendor</th><th>Amount</th><th>Actions</th></tr></thead>
+            <thead><tr><th>Id</th><th>Date</th><th>Time</th><th>Category</th><th>Vendor</th><th>Note</th><th>Amount</th><th>Actions</th></tr></thead>
             <tbody id="expenseList"></tbody>
           </table>
         </div>
@@ -156,7 +198,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <script>
-    // Utility to get key for month-year
+    function updateHeader() {
+      const header = document.getElementById('headerTitle');
+      const now = new Date();
+      const monthYear = now.toLocaleString('en-GB',{month:'long', year:'numeric'});
+      header.textContent = `${monthYear} Expense Tracker`;
+    }
+
     function getMonthKey(date) {
       const m = date.getMonth() + 1;
       const y = date.getFullYear();
@@ -164,8 +212,9 @@
     }
     const monthKey = getMonthKey(new Date());
     let budget = 0;
-    
-    // Load or reset budget on new month
+    let filterStart = '';
+    let filterEnd = '';
+
     function loadBudget() {
       const storedMonth = localStorage.getItem('budgetMonth');
       const storedYear = localStorage.getItem('budgetYear');
@@ -174,15 +223,12 @@
         if (confirm('New month detected. Reset budget?')) {
           promptBudget();
         } else {
-          // Carry over previous budget but update month markers
           localStorage.setItem('budgetMonth', now.getMonth() + 1);
           localStorage.setItem('budgetYear', now.getFullYear());
-          const b = localStorage.getItem('budget') || '2000';
-          budget = parseFloat(b);
+          budget = parseFloat(localStorage.getItem('budget') || '2000');
         }
       } else {
-        const b = localStorage.getItem('budget') || '2000';
-        budget = parseFloat(b);
+        budget = parseFloat(localStorage.getItem('budget') || '2000');
       }
       updateBudgetDisplay();
     }
@@ -200,9 +246,9 @@
     function updateBudgetDisplay() {
       document.getElementById('budgetDisplay').textContent = budget.toFixed(2);
       renderDashboard();
+      updateHeader();
     }
 
-    // Expenses storage
     function loadExpenses(key) {
       const data = localStorage.getItem(`expenses_${key}`);
       return data ? JSON.parse(data) : [];
@@ -211,9 +257,8 @@
       localStorage.setItem(`expenses_${key}`, JSON.stringify(arr));
     }
 
-    // Add expense
-    function addExpense(e) {
-      e.preventDefault();
+    function addExpense(event) {
+      event.preventDefault();
       const category = document.getElementById('category').value;
       const vendor = document.getElementById('vendor').value;
       const amount = parseFloat(document.getElementById('amount').value);
@@ -223,16 +268,15 @@
         id: Date.now(),
         date: now.toLocaleDateString('en-GB'),
         time: now.toLocaleTimeString('en-GB'),
-        category, vendor, amount, note
+        category, vendor, note, amount
       };
       const arr = loadExpenses(monthKey);
       arr.push(exp);
       saveExpenses(monthKey, arr);
-      e.target.reset();
+      document.getElementById('expenseForm').reset();
       renderDashboard();
     }
 
-    // Render entire dashboard
     function renderDashboard() {
       const arr = loadExpenses(monthKey);
       const spent = arr.reduce((sum, x) => sum + x.amount, 0);
@@ -244,110 +288,99 @@
         spent > budget * 0.9 ? 'status-red' :
         spent > budget * 0.5 ? 'status-orange' :
         'status-green';
-
       document.getElementById('remainingDisplay').textContent = remaining.toFixed(2);
 
       // Top 3 categories
-      const catMap = {};
-      arr.forEach(e => catMap[e.category] = (catMap[e.category]||0) + e.amount);
-      const topCats = Object.entries(catMap)
-        .map(([k,v]) => ({k,v}))
-        .sort((a,b) => b.v - a.v)
-        .slice(0,3);
       const catBody = document.getElementById('topCategories');
       catBody.innerHTML = '';
-      topCats.forEach((item,i) => {
-        const perc = ((item.v/spent*100)||0).toFixed(1) + '%';
-        catBody.innerHTML += `<tr><td>${i+1}</td><td>${item.k}</td><td>₹${item.v.toFixed(2)}</td><td>${perc}</td></tr>`;
-      });
+      const catMap = {};
+      arr.forEach(e => catMap[e.category] = (catMap[e.category]||0) + e.amount);
+      Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0,3)
+        .forEach(([cat,amt],i) => {
+          const perc = ((amt/spent*100)||0).toFixed(1) + '%';
+          catBody.innerHTML += `<tr><td>${i+1}</td><td>${cat}</td><td>₹${amt.toFixed(2)}</td><td>${perc}</td></tr>`;
+        });
 
       // Top 3 vendors
-      const venMap = {};
-      arr.forEach(e => venMap[e.vendor] = (venMap[e.vendor]||0) + e.amount);
-      const topVens = Object.entries(venMap)
-        .map(([k,v]) => ({k,v}))
-        .sort((a,b) => b.v - a.v)
-        .slice(0,3);
       const venBody = document.getElementById('topVendors');
       venBody.innerHTML = '';
-      topVens.forEach((item,i) => {
-        const perc = ((item.v/spent*100)||0).toFixed(1) + '%';
-        venBody.innerHTML += `<tr><td>${i+1}</td><td>${item.k}</td><td>₹${item.v.toFixed(2)}</td><td>${perc}</td></tr>`;
-      });
+      const venMap = {};
+      arr.forEach(e => venMap[e.vendor] = (venMap[e.vendor]||0) + e.amount);
+      Object.entries(venMap).sort((a,b) => b[1]-a[1]).slice(0,3)
+        .forEach(([ven,amt],i) => {
+          const perc = ((amt/spent*100)||0).toFixed(1) + '%';
+          venBody.innerHTML += `<tr><td>${i+1}</td><td>${ven}</td><td>₹${amt.toFixed(2)}</td><td>${perc}</td></tr>`;
+        });
 
-      // Weekly summary (7-day blocks from 1st)
+      // Weekly summary
       const weeklyBody = document.getElementById('weeklySummary');
       weeklyBody.innerHTML = '';
       for (let w=1; w<=5; w++) {
         const start = (w-1)*7 + 1;
         const end = w*7;
-        const sumW = arr
-          .filter(e => parseInt(e.date.split('/')[0]) >= start && parseInt(e.date.split('/')[0]) <= end)
-          .reduce((s,e) => s + e.amount, 0);
-        if (sumW>0 || w <= Math.ceil(new Date().getDate()/7)) {
+        const sumW = arr.filter(e => {
+          const day = parseInt(e.date.split('/')[0]);
+          return day >= start && day <= end;
+        }).reduce((s,e) => s + e.amount, 0);
+        if (sumW>0 || start <= new Date().getDate()) {
           weeklyBody.innerHTML += `<tr><td>${w}</td><td>${start}-${end}</td><td>₹${sumW.toFixed(2)}</td></tr>`;
         }
       }
 
-      // Monthly summary across all stored months
+      // Monthly summary
       const monBody = document.getElementById('monthlySummary');
       monBody.innerHTML = '';
-      Object.keys(localStorage)
-        .filter(k => k.startsWith('expenses_'))
-        .sort().reverse()
+      Object.keys(localStorage).filter(k => k.startsWith('expenses_')).sort().reverse()
         .forEach(k => {
           const key = k.split('_')[1];
           const expArr = loadExpenses(key);
           const sumM = expArr.reduce((s,e) => s + e.amount, 0);
-          const cm = {};
-          expArr.forEach(e => cm[e.category] = (cm[e.category]||0) + e.amount);
-          const top = Object.entries(cm).sort((a,b)=>b[1]-a[1])[0] || [];
+          const cm = {}; expArr.forEach(e=> cm[e.category] = (cm[e.category]||0)+e.amount);
+          const [topCat,topAmt] = Object.entries(cm).sort((a,b)=>b[1]-a[1])[0]||['-',0];
           const monthName = new Date(key.slice(2), parseInt(key.slice(0,2))-1)
             .toLocaleString('en-GB',{month:'short'});
-          monBody.innerHTML +=
-            `<tr><td>${monthName}</td><td>₹${sumM.toFixed(2)}</td><td>${top[0]||'-'}</td><td>${top[1]?((top[1]/sumM*100).toFixed(1)+'%'):'-'}</td></tr>`;
+          monBody.innerHTML += `<tr><td>${monthName}</td><td>₹${sumM.toFixed(2)}</td><td>${topCat}</td><td>${topAmt?((topAmt/sumM*100).toFixed(1)+'%'):'-'}</td></tr>`;
         });
 
-      // Recent expenses list
       renderExpenseList();
-
-      // Archive
       renderArchive();
     }
 
-    // Recent list & filter
-    let currentFilter = '';
     function renderExpenseList() {
       const arr = loadExpenses(monthKey);
       const body = document.getElementById('expenseList');
       body.innerHTML = '';
-      const list = currentFilter
-        ? arr.filter(e => {
-            const [d,m,y] = e.date.split('/');
-            return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}` === currentFilter;
-          })
-        : arr;
+      const list = arr.filter(e => {
+        const [d,m,y] = e.date.split('/');
+        const dateStr = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        if (filterStart && dateStr < filterStart) return false;
+        if (filterEnd && dateStr > filterEnd) return false;
+        return true;
+      });
       list.forEach(e => {
         body.innerHTML +=
-          `<tr><td>${e.id}</td><td>${e.date}</td><td>${e.time}</td><td>${e.category}</td>` +
-          `<td>${e.vendor}</td><td>₹${e.amount.toFixed(2)}</td>` +
-          `<td><button class="btn btn-sm btn-warning me-1" onclick="editExpense(${e.id})">✎</button>` +
+          `<tr><td>${e.id}</td><td>${e.date}</td><td>${e.time}</td><td>${e.category}</td>`+
+          `<td>${e.vendor}</td><td>${e.note}</td><td>₹${e.amount.toFixed(2)}</td>`+
+          `<td><button class="btn btn-sm btn-warning me-1" onclick="editExpense(${e.id})">✎</button>`+
           `<button class="btn btn-sm btn-danger" onclick="deleteExpense(${e.id})">✗</button></td></tr>`;
       });
     }
-    document.getElementById('filterBtn').addEventListener('click',()=>{
-      currentFilter = document.getElementById('filterDate').value;
+
+    document.getElementById('filterBtn').addEventListener('click', ()=>{
+      filterStart = document.getElementById('startDate').value;
+      filterEnd = document.getElementById('endDate').value;
       renderExpenseList();
     });
-    document.getElementById('clearFilterBtn').addEventListener('click',()=>{
-      currentFilter = '';
-      document.getElementById('filterDate').value = '';
+    document.getElementById('clearFilterBtn').addEventListener('click', ()=>{
+      filterStart = '';
+      filterEnd = '';
+      document.getElementById('startDate').value = '';
+      document.getElementById('endDate').value = '';
       renderExpenseList();
     });
 
-    // Edit & Delete
     function deleteExpense(id) {
-      let arr = loadExpenses(monthKey).filter(x => x.id !== id);
+      const arr = loadExpenses(monthKey).filter(x => x.id !== id);
       saveExpenses(monthKey, arr);
       renderDashboard();
     }
@@ -362,8 +395,7 @@
       deleteExpense(id);
     }
 
-    // CSV & PDF Export
-    document.getElementById('exportCsvBtn').addEventListener('click',()=>{
+    document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
       const arr = loadExpenses(monthKey);
       const csv = Papa.unparse(arr);
       const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
@@ -372,50 +404,38 @@
       a.download = `expenses_${monthKey}.csv`; a.click();
       URL.revokeObjectURL(url);
     });
-    document.getElementById('exportPdfBtn').addEventListener('click',()=>{
+    document.getElementById('exportPdfBtn').addEventListener('click', ()=>{
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const arr = loadExpenses(monthKey);
-      const cols = ["Id","Date","Time","Category","Vendor","Amount","Note"];
-      const rows = arr.map(e=>[e.id,e.date,e.time,e.category,e.vendor,e.amount.toFixed(2),e.note]);
+      const cols = ["Id","Date","Time","Category","Vendor","Note","Amount"];
+      const rows = arr.map(e=>[e.id,e.date,e.time,e.category,e.vendor,e.note,e.amount.toFixed(2)]);
       doc.autoTable({ head: [cols], body: rows });
       doc.save(`expenses_${monthKey}.pdf`);
     });
 
-    document.getElementById('resetBudgetBtn').addEventListener('click', promptBudget);
-
-    // Archive rendering
     function renderArchive() {
-      const acc = document.getElementById('archiveList');
-      acc.innerHTML = '';
-      const keys = Object.keys(localStorage)
-        .filter(k => k.startsWith('expenses_')).sort().reverse();
-      keys.forEach((k,i) => {
-        const key = k.split('_')[1];
-        if (key === monthKey) return;
+      const acc = document.getElementById('archiveList'); acc.innerHTML = '';
+      const keys = Object.keys(localStorage).filter(k=>k.startsWith('expenses_')).sort().reverse();
+      keys.forEach((k,i)=>{
+        const key = k.split('_')[1]; if(key===monthKey) return;
         const expArr = loadExpenses(key);
-        const mm = parseInt(key.slice(0,2))-1;
-        const yyyy = key.slice(2);
-        const title = new Date(yyyy,mm)
-          .toLocaleString('en-GB',{month:'long',year:'numeric'});
+        const [mm,yyyy] = [key.slice(0,2), key.slice(2)];
+        const title = new Date(yyyy, mm-1).toLocaleString('en-GB',{month:'long',year:'numeric'});
         acc.innerHTML +=
-          `<div class="accordion-item">` +
-            `<h2 class="accordion-header">` +
-              `<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc${i}">` +
-                `${title} (${expArr.length} items)` +
-              `</button>` +
-            `</h2>` +
-            `<div id="acc${i}" class="accordion-collapse collapse" data-bs-parent="#archiveList">` +
-              `<div class="accordion-body">` +
-                `<button class="btn btn-sm btn-outline-success mb-2" onclick="downloadCsvArchive('${key}')">CSV</button>` +
-                `<button class="btn btn-sm btn-outline-danger mb-2" onclick="downloadPdfArchive('${key}')">PDF</button>` +
-                `<table class="table table-sm"><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th></tr></thead>` +
-                `<tbody>` + expArr.map(e=>
-                  `<tr><td>${e.date}</td><td>${e.category}</td><td>${e.vendor}</td><td>₹${e.amount.toFixed(2)}</td></tr>`
-                ).join('') +
-                `</tbody></table>` +
-              `</div>` +
-            `</div>` +
+          `<div class="accordion-item">`+
+            `<h2 class="accordion-header">`+
+              `<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#acc${i}">${title} (${expArr.length} items)</button>`+
+            `</h2>`+
+            `<div id="acc${i}" class="accordion-collapse collapse" data-bs-parent="#archiveList">`+
+              `<div class="accordion-body">`+
+                `<button class="btn btn-sm btn-outline-success mb-2" onclick="downloadCsvArchive('${key}')">CSV</button>`+
+                `<button class="btn btn-sm btn-outline-danger mb-2" onclick="downloadPdfArchive('${key}')">PDF</button>`+
+                `<table class="table table-sm"><thead><tr><th>Date</th><th>Category</th><th>Vendor</th><th>Amount</th></tr></thead><tbody>`+
+                expArr.map(e=>`<tr><td>${e.date}</td><td>${e.category}</td><td>${e.vendor}</td><td>₹${e.amount.toFixed(2)}</td></tr>`).join('')+
+                `</tbody></table>`+
+              `</div>`+
+            `</div>`+
           `</div>`;
       });
     }
@@ -438,8 +458,9 @@
       doc.save(`expenses_${key}.pdf`);
     }
 
-    // Init
     document.getElementById('expenseForm').addEventListener('submit', addExpense);
+    document.getElementById('resetBudgetBtn').addEventListener('click', promptBudget);
+
     loadBudget();
     renderDashboard();
   </script>
