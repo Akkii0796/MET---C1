@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker Pro (Mobile Optimized)</title>
+    <title>Monthly Expense Tracker (Mobile Optimized)</title>
     <!-- Chart.js & Datalabels -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
     <!-- jsPDF for PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    <!-- Icons (Material Icons) -->
+    <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
     <style>
         :root {
             --primary: #3b82f6;
-            --primary-dark: #1d4ed8;
             --accent: #06b6d4;
             --danger: #ef4444;
             --success: #22c55e;
-            --grey-bg: #f6f7fb;
-            --grey: #6b7280;
+            --grey-bg: #f8fafc;
             --radius: 14px;
-            --font-large: 1.2rem;
+            --font-large: 1.18rem;
             --font-medium: 1rem;
-            --font-small: .95rem;
+            --font-small: .97rem;
         }
         * { box-sizing: border-box; }
         body {
@@ -34,78 +32,80 @@
             background: var(--grey-bg);
             color: #18181b;
         }
-        .app-header {
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            min-height: 100vh;
+            box-shadow: 0 4px 18px rgba(0,0,0,0.03);
+        }
+        .header {
             background: linear-gradient(90deg, var(--primary), var(--accent));
             color: #fff;
-            padding: 1rem .5rem;
+            padding: 1.1rem 1rem .7rem 1rem;
             text-align: center;
             font-size: var(--font-large);
             font-weight: 600;
             letter-spacing: 1px;
             border-radius: 0 0 var(--radius) var(--radius);
+            position: sticky; top: 0; z-index: 3;
         }
         .tabs {
             display: flex;
-            justify-content: space-around;
-            background: #fff;
-            border-bottom: 1px solid #e5e7eb;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            background: #f8f9fa;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
             position: sticky;
-            top: 0;
-            z-index: 3;
+            top: 54px;
+            z-index: 2;
         }
-        .tab {
+        .tab-button {
             flex: 1;
-            padding: .7rem 0;
-            font-size: var(--font-medium);
-            color: var(--grey);
-            border: none;
+            padding: 13px 2px 11px 2px;
             background: none;
-            outline: none;
+            border: none;
             cursor: pointer;
-            transition: background 0.2s, color 0.2s;
+            font-size: 1.01rem;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.22s;
+            white-space: nowrap;
+            min-width: 120px;
         }
-        .tab.active {
+        .tab-button.active {
+            background: #fff;
             color: var(--primary);
             border-bottom: 3px solid var(--primary);
-            background: #f0f9ff;
         }
-        .tab i {
-            vertical-align: middle;
-            margin-right: .2rem;
-        }
-        .tab-content {
-            display: none;
-            animation: fadeIn .3s;
-            padding: .7rem .5rem 1.2rem .5rem;
-        }
-        .tab-content.active { display: block; }
+        .tab-content { display: none; padding: .7rem .5rem 1.2rem .5rem; }
+        .tab-content.active { display: block; animation: fadeIn .35s;}
         @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
 
         /* Budget Summary */
-        .budget-grid {
+        .budget-summary {
             display: flex;
             gap: 8px;
-            justify-content: space-between;
-            margin: .7rem 0 1.2rem 0;
+            margin-bottom: 17px;
+            flex-wrap: wrap;
         }
         .budget-card {
             flex: 1;
-            background: linear-gradient(135deg, #818cf8 0%, #06b6d4 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
             color: #fff;
             border-radius: var(--radius);
             text-align: center;
             padding: .7rem .1rem;
-            font-size: 1.09rem;
-            box-shadow: 0 2px 8px rgba(59,130,246,0.08);
+            font-size: 1.08rem;
+            box-shadow: 0 2px 8px rgba(59,130,246,0.09);
+            min-width: 120px;
         }
         .budget-card .amount {
             font-size: 1.5rem;
             font-weight: 700;
-            margin-top: .3rem;
+            margin-top: .22rem;
             letter-spacing: 1px;
         }
-        .progress-bar-wrap { margin: .7rem 0; }
+        .progress-bar-wrap { margin: .5rem 0; }
         .progress-bar {
             width: 100%; height: 18px;
             background: #e5e7eb; border-radius: 9px; overflow: hidden;
@@ -117,18 +117,19 @@
         }
         .progress-fill.warning { background: linear-gradient(90deg,#fde047,#fbbf24);}
         .progress-fill.danger { background: linear-gradient(90deg,#ef4444,#f87171);}
-        .progress-text { font-size: var(--font-small); margin-top: 3px; text-align: right;}
+        .progress-text { font-size: var(--font-small); margin-top: 4px; text-align: right;}
 
-        /* Form & Controls */
-        .form-row { display: flex; gap: 8px; margin-bottom: .7rem;}
-        .form-row .form-group { flex: 1; }
-        .form-group { margin-bottom: .6rem;}
-        .form-group label { font-weight: 600; font-size: var(--font-small); margin-bottom: 2px; display: block;}
+        /* Add Expense */
+        .section { background: #fff; border-radius: var(--radius); padding: .7rem .7rem .9rem .7rem; margin-bottom: 17px; box-shadow: 0 2px 9px rgba(0,0,0,0.05);}
+        .section h2 { color: var(--primary); margin-bottom: 16px; font-size: 1.18em; }
+        .form-row { display: flex; gap: 8px; margin-bottom: .7rem; flex-wrap: wrap;}
+        .form-group { margin-bottom: .6rem; flex: 1; min-width: 120px;}
+        .form-group label { font-weight: 600; font-size: var(--font-small); margin-bottom: 3px; display: block;}
         input, select, textarea {
             width: 100%;
-            padding: 10px 7px;
+            padding: 11px 7px;
             border-radius: 7px;
-            border: 1.5px solid #d1d5db;
+            border: 1.6px solid #d1d5db;
             font-size: var(--font-medium);
             transition: border .2s;
         }
@@ -137,9 +138,9 @@
             outline: none;
         }
         .radio-group { display: flex; gap: 7px; }
-        .user-pill { background: #e0e7ff; padding: 2px 10px; border-radius: 12px; font-size: .98em; margin-right: 4px;}
+        .user-pill { background: #e0e7ff; padding: 2px 10px; border-radius: 12px; font-size: 1em; margin-right: 4px;}
         .btn {
-            padding: 10px 20px;
+            padding: 10px 19px;
             border: none;
             border-radius: 7px;
             background: linear-gradient(90deg,var(--primary),var(--accent));
@@ -156,188 +157,164 @@
         .btn.danger { background: linear-gradient(90deg,#ef4444,#f87171);}
         .btn.success { background: linear-gradient(90deg,#22c55e,#16a34a);}
         .btn[disabled] { opacity: .65; cursor: not-allowed; }
-        .btn.small { padding: 7px 12px; font-size: .92rem;}
+        .btn-group { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 7px; }
 
         /* Expenses Table Compact */
-        .expenses-table-wrap {
-            overflow-x: auto;
-            margin: .7rem 0;
-            border-radius: var(--radius);
-            background: #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-        }
-        table.expenses-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: var(--font-medium);
-        }
-        .expenses-table th, .expenses-table td {
-            padding: 6px 5px;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: left;
-        }
-        .expenses-table th {
-            background: #f0f9ff;
-            color: #374151;
-            font-size: 1.02em;
-        }
-        .expenses-table tr.selected { background: #e0e7ff; }
-        .expenses-table td.amount { font-weight: bold; font-size: 1.15em; color: var(--primary-dark);}
-        .expenses-table td.note { max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .expenses-table td.actions { min-width: 90px;}
-        .edit-row input, .edit-row select, .edit-row textarea { padding: 6px 3px; font-size: .95em;}
+        .table-container { overflow-x: auto; border-radius: var(--radius); background: #fff; box-shadow: 0 2px 9px rgba(0,0,0,0.02);}
+        table { width: 100%; border-collapse: collapse; font-size: var(--font-medium);}
+        th, td { padding: 10px 6px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+        th { background: #f0f9ff; color: #374151; font-size: 1.06em;}
+        td.amount { font-weight: bold; font-size: 1.15em; color: var(--primary);}
+        td.note { max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        td.actions { min-width: 100px;}
+        .edit-row input, .edit-row select, .edit-row textarea { padding: 6px 3px; font-size: .99em;}
         .edit-row td { background: #f3f4f6 !important;}
-        .compact-row { font-size: 1.09em; height: 40px; }
-        .compact-row td { padding: 6px 4px; }
-
-        /* Checkbox for bulk actions */
-        .bulk-checkbox { width: 18px; height: 18px;}
-
-        /* Floating Action Button for Add */
-        .fab-add {
-            position: fixed; bottom: 2.3rem; right: 1.4rem;
-            background: linear-gradient(90deg,var(--primary),var(--accent));
-            color: #fff;
-            border: none;
-            border-radius: 50%; width: 54px; height: 54px;
-            font-size: 2.2rem;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 18px rgba(59,130,246,0.16);
-            cursor: pointer;
-            z-index: 30;
+        .compact-row { font-size: 1.10em; height: 38px; }
+        .compact-row td { padding: 8px 5px; }
+        .bulk-checkbox { width: 19px; height: 19px;}
+        .expenses-table tr.selected { background: #e0e7ff; }
+        /* Checkbox sticky */
+        th:first-child, td:first-child { position: sticky; left: 0; background: #fff; z-index: 1;}
+        /* Mobile Table Tweaks */
+        @media (max-width: 700px) {
+            .tab-content { padding: .3rem 1px .5rem 1px;}
+            .budget-summary { flex-direction: column; gap: 4px;}
+            th, td { padding: 9px 3px;}
+            .btn-group { gap: 6px;}
         }
-        .fab-add:active { transform: scale(0.96);}
-        .fab-add i { font-size: 2.1rem;}
-
-        /* Collapsible Section */
-        .section-collapsible { margin-bottom: .6rem; }
-        .section-header {
-            font-weight: bold; font-size: 1.08em;
-            background: #f1f5f9;
-            padding: 10px 7px; border-radius: var(--radius);
-            cursor: pointer; display: flex; align-items: center; justify-content: space-between;
-            transition: background .2s;
+        @media (max-width: 480px) {
+            .budget-card { font-size: 1.03rem; }
+            .budget-card .amount { font-size: 1.22rem; }
+            .form-group label { font-size: .96rem;}
         }
-        .section-header:hover { background: #e0e7ff;}
-        .section-body { padding: 6px 0 0 0; display: none; }
-        .section-collapsible.active .section-body { display: block; animation: fadeIn .22s;}
-        .section-collapsible.active .expand-icon { transform: rotate(90deg);}
-        .expand-icon { transition: transform .23s; margin-left: 4px; }
-
-        /* Modal (for category/user mgmt & expense edit) */
+        /* Modal (category/user mgmt & expense edit) */
         .modal-backdrop {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.27); z-index: 1001; display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.22); z-index: 1001; display: flex; align-items: center; justify-content: center;
         }
         .modal {
-            background: #fff; border-radius: var(--radius); padding: 1.3rem 1.1rem .8rem 1.1rem;
-            box-shadow: 0 10px 36px rgba(37, 99, 235, 0.10);
-            max-width: 97vw; width: 370px; min-width: 0;
+            background: #fff; border-radius: var(--radius); padding: 1.15rem .9rem .7rem .9rem;
+            box-shadow: 0 10px 36px rgba(37, 99, 235, 0.12);
+            max-width: 97vw; width: 345px; min-width: 0;
             position: relative;
-            animation: fadeIn .18s;
+            animation: fadeIn .16s;
         }
         .modal-header {
-            font-weight: 600; font-size: 1.15em; margin-bottom: .45rem; display: flex; align-items: center; gap: 8px;
+            font-weight: 600; font-size: 1.13em; margin-bottom: .45rem; display: flex; align-items: center; gap: 8px;
         }
         .modal-close {
-            position: absolute; right: 13px; top: 12px; background: none; border: none; font-size: 1.5em; color: var(--grey); cursor: pointer;
+            position: absolute; right: 12px; top: 10px; background: none; border: none; font-size: 1.38em; color: #9ca3af; cursor: pointer;
         }
-        .modal-content { margin-bottom: 1.1rem;}
+        .modal-content { margin-bottom: 1.07rem;}
         .category-chip, .user-chip {
             display: inline-block; background: #e0e7ff; color: #374151; padding: 3px 11px; border-radius: 11px;
             font-size: .97em; margin: 2px 7px 2px 0;
         }
-        .chip-remove {
-            margin-left: 4px; color: var(--danger); cursor: pointer; font-size: 1.08em;
-        }
+        .chip-remove { margin-left: 4px; color: var(--danger); cursor: pointer; font-size: 1.07em;}
 
         /* Analytics & Charts */
-        .charts-grid {
-            display: grid; grid-template-columns: 1fr; gap: 20px;
+        .chart-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 25px;
         }
-        .chart-box { background: #fff; border-radius: var(--radius); padding: .6rem .3rem; }
-        .chart-box h4 { font-size: 1.04em; font-weight: 600; margin-bottom: 5px; }
-
-        /* Responsive */
-        @media (min-width: 550px) {
-            .charts-grid { grid-template-columns: 1fr 1fr;}
-            .expenses-table-wrap { min-width: 0;}
+        .chart-container { background: #fff; border-radius: var(--radius); padding: .6rem .3rem; }
+        .chart-container h4 { font-size: 1.06em; font-weight: 600; margin-bottom: 5px; }
+        @media (max-width: 700px) {
+            .chart-grid { grid-template-columns: 1fr; gap: 14px;}
         }
-        @media (max-width: 520px) {
-            .tab-content { padding: .4rem .1rem .9rem .1rem;}
-            .budget-grid { flex-direction: column; gap: 5px;}
-        }
-        @media (max-width: 390px) {
-            .modal { width: 96vw;}
-            .budget-card { font-size: .96rem;}
-        }
-
         /* Toast Message */
         .toast {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            min-width: 180px; max-width: 92vw; padding: 12px 20px; font-size: 1.06em;
+            min-width: 180px; max-width: 95vw; padding: 13px 21px; font-size: 1.06em;
             border-radius: var(--radius); z-index: 2002; color: #fff;
-            box-shadow: 0 8px 36px rgba(0,0,0,0.15);
-            animation: fadeIn .2s;
+            box-shadow: 0 8px 36px rgba(0,0,0,0.12);
+            animation: fadeIn .22s;
         }
         .toast.success { background: var(--success);}
         .toast.error { background: var(--danger);}
-        .toast.info { background: var(--primary-dark);}
+        .toast.info { background: var(--primary);}
     </style>
 </head>
 <body>
-    <div class="app-header">💰 Expense Tracker Pro</div>
-    <div class="tabs" id="tabs">
-        <button class="tab active" data-tab="dashboard"><i class="material-icons">dashboard</i>Dashboard</button>
-        <button class="tab" data-tab="expenses"><i class="material-icons">receipt</i>Expenses</button>
-        <button class="tab" data-tab="analytics"><i class="material-icons">analytics</i>Analytics</button>
-        <button class="tab" data-tab="settings"><i class="material-icons">settings</i>Settings</button>
-    </div>
+    <div class="container">
+        <div class="header">💰 Monthly Expense Tracker</div>
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('dashboard', event)">📊 Dashboard</button>
+            <button class="tab-button" onclick="showTab('summary', event)">📈 Summary</button>
+            <button class="tab-button" onclick="showTab('search', event)">🔍 Search</button>
+            <button class="tab-button" onclick="openSettingsModal()">⚙️</button>
+        </div>
 
-    <!-- Dashboard -->
-    <div class="tab-content active" id="dashboard">
-        <div class="budget-grid">
-            <div class="budget-card">
-                <div>Total Budget</div>
-                <div class="amount" id="totalBudget">₹0</div>
-            </div>
-            <div class="budget-card">
-                <div>Total Spent</div>
-                <div class="amount" id="totalSpent">₹0</div>
-            </div>
-            <div class="budget-card">
-                <div>Remaining</div>
-                <div class="amount" id="remainingBudget">₹0</div>
-            </div>
-        </div>
-        <div class="progress-bar-wrap">
-            <div class="progress-bar"><div class="progress-fill" id="budgetProgress"></div></div>
-            <div class="progress-text" id="progressText"></div>
-        </div>
-        <div class="form-row">
-            <input type="number" id="newBudget" placeholder="Set new monthly budget" min="0">
-            <button class="btn success" onclick="setBudget()">Set</button>
-            <button class="btn secondary" onclick="resetBudget()">Reset</button>
-        </div>
-        <!-- Add Expense button floats, see below -->
-    </div>
-
-    <!-- Expenses -->
-    <div class="tab-content" id="expenses">
-        <div class="section-collapsible active">
-            <div class="section-header" onclick="toggleCollapsible(this)">
-                <span>Recent Expenses</span>
-                <span class="expand-icon"><i class="material-icons">chevron_right</i></span>
-            </div>
-            <div class="section-body">
-                <div style="display:flex; align-items:center; gap:7px; margin-bottom:7px;">
-                    <button class="btn small danger" onclick="deleteSelectedExpenses()">Delete Selected</button>
-                    <button class="btn small" onclick="downloadCSV()">Export CSV</button>
-                    <button class="btn small" onclick="downloadPDF()">Export PDF</button>
-                    <span id="selectedCount" style="font-size:.98em;color:var(--grey);"></span>
+        <!-- Dashboard -->
+        <div id="dashboard" class="tab-content active">
+            <div class="budget-summary">
+                <div class="budget-card">
+                    <div>Total Budget</div>
+                    <div class="amount" id="totalBudget">₹0</div>
                 </div>
-                <div class="expenses-table-wrap">
-                    <table class="expenses-table" id="expensesTable">
+                <div class="budget-card">
+                    <div>Total Spent</div>
+                    <div class="amount" id="totalSpent">₹0</div>
+                </div>
+                <div class="budget-card">
+                    <div>Remaining</div>
+                    <div class="amount" id="remainingBudget">₹0</div>
+                </div>
+            </div>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="budgetProgress"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+            </div>
+            <div class="form-row">
+                <input type="number" id="newBudget" placeholder="Set new monthly budget" min="0">
+                <button class="btn success" onclick="setBudget()">Set</button>
+                <button class="btn secondary" onclick="resetBudget()">Reset</button>
+            </div>
+            <div class="section">
+                <h2>Add New Expense</h2>
+                <form id="expenseForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>User</label>
+                            <select id="expUser"></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Category</label>
+                            <select id="expCategory"></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Vendor</label>
+                            <input type="text" id="expVendor" required placeholder="Enter vendor name">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount (₹)</label>
+                            <input type="number" id="expAmount" required min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="expDate" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Note (Optional)</label>
+                        <textarea id="expNote" rows="2" placeholder="Add any additional notes..."></textarea>
+                    </div>
+                    <button type="submit" class="btn success" id="addExpenseBtn">Add Expense</button>
+                </form>
+            </div>
+            <div class="section">
+                <h2>Recent Expenses</h2>
+                <div class="btn-group">
+                    <button class="btn danger" onclick="deleteSelectedExpenses()">Delete Selected</button>
+                    <button class="btn" onclick="downloadCSV()">Export CSV</button>
+                    <button class="btn" onclick="downloadPDF()">Export PDF</button>
+                    <span id="selectedCount" style="font-size:.97em;color:#666;"></span>
+                </div>
+                <div class="table-container">
+                    <table id="recentExpensesTable">
                         <thead>
                             <tr>
                                 <th><input type="checkbox" id="selectAll" class="bulk-checkbox" onchange="toggleSelectAll(this)"></th>
@@ -355,494 +332,615 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Analytics -->
-    <div class="tab-content" id="analytics">
-        <div class="section-collapsible active">
-            <div class="section-header" onclick="toggleCollapsible(this)">
-                <span>Spending Analytics</span>
-                <span class="expand-icon"><i class="material-icons">chevron_right</i></span>
-            </div>
-            <div class="section-body">
-                <div class="charts-grid">
-                    <div class="chart-box">
+        <!-- Summary -->
+        <div id="summary" class="tab-content">
+            <div class="section">
+                <h2>Spending Analytics</h2>
+                <div class="chart-grid">
+                    <div class="chart-container">
                         <h4>By Category</h4>
-                        <canvas id="categoryPieChart" height="180"></canvas>
+                        <canvas id="categoryPieChart"></canvas>
                     </div>
-                    <div class="chart-box">
+                    <div class="chart-container">
                         <h4>Monthly Trend</h4>
-                        <canvas id="monthlyTrendChart" height="180"></canvas>
+                        <canvas id="monthlyTrendChart"></canvas>
                     </div>
-                    <div class="chart-box">
+                    <div class="chart-container">
                         <h4>By User</h4>
-                        <canvas id="userSpendingChart" height="180"></canvas>
+                        <canvas id="userSpendingChart"></canvas>
                     </div>
-                    <div class="chart-box">
+                    <div class="chart-container">
                         <h4>Transaction Count</h4>
-                        <canvas id="categoryCountChart" height="180"></canvas>
+                        <canvas id="categoryCountChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Settings -->
-    <div class="tab-content" id="settings">
-        <div class="section-collapsible active">
-            <div class="section-header" onclick="toggleCollapsible(this)">
-                <span>Manage Categories & Users</span>
-                <span class="expand-icon"><i class="material-icons">chevron_right</i></span>
-            </div>
-            <div class="section-body">
-                <button class="btn small" onclick="openCategoryModal()">Edit Categories</button>
-                <button class="btn small" onclick="openUserModal()">Edit Users</button>
+        <!-- Search -->
+        <div id="search" class="tab-content">
+            <div class="section">
+                <h2>Search & Filter Expenses</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="searchText">Search</label>
+                        <input type="text" id="searchText" placeholder="Search by vendor, category, note, or user...">
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">End Date</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn" onclick="searchExpenses()">🔍 Search</button>
+                    <button class="btn secondary" onclick="clearFilters()">🔄 Clear</button>
+                    <button class="btn" onclick="downloadFilteredCSV()">Export CSV</button>
+                    <button class="btn" onclick="downloadFilteredPDF()">Export PDF</button>
+                </div>
+                <div class="table-container">
+                    <table id="searchResultsTable">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="searchSelectAll" class="bulk-checkbox" onchange="toggleSearchSelectAll(this)"></th>
+                                <th>Date</th>
+                                <th>User</th>
+                                <th>Category</th>
+                                <th>Vendor</th>
+                                <th>₹</th>
+                                <th>Note</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <span id="searchSelectedCount" style="font-size:.97em;color:#666;"></span>
             </div>
         </div>
     </div>
-
-    <!-- Floating Action Button for Add -->
-    <button class="fab-add" id="addExpenseFab" onclick="openExpenseModal()"><i class="material-icons">add</i></button>
-
-    <!-- Modals -->
+    <!-- Settings modal, toast, and edit expense modal injected here -->
     <div id="modalRoot"></div>
     <div id="toast"></div>
 
-    <script>
-        // ----- Data Storage Keys -----
-        const STORAGE = {
-            EXPENSES: "exp_trk_expenses",
-            BUDGET: "exp_trk_budget",
-            CATEGORIES: "exp_trk_categories",
-            USERS: "exp_trk_users"
-        };
+<script>
+    // Data Keys
+    const STORAGE = {
+        EXPENSES: "exp_trk_expenses",
+        BUDGET: "exp_trk_budget",
+        CATEGORIES: "exp_trk_categories",
+        USERS: "exp_trk_users"
+    };
+    const DEFAULT_CATEGORIES = [
+        "Grocery", "Bills", "Travelling", "Food", "Medical", "EMI", "Investment",
+        "Shopping", "Entertainment", "Personal Care", "Education", "Gifts/Donations",
+        "Home Maintenance", "Transportation", "Utilities", "Others"
+    ];
+    const DEFAULT_USERS = ["Akshay", "Achal"];
 
-        // ----- Defaults -----
-        const DEFAULT_CATEGORIES = [
-            "Grocery", "Bills", "Travelling", "Food", "Medical", "EMI", "Investment",
-            "Shopping", "Entertainment", "Personal Care", "Education", "Gifts/Donations",
-            "Home Maintenance", "Transportation", "Utilities", "Others"
-        ];
-        const DEFAULT_USERS = ["Akshay", "Achal"];
+    // State
+    let expenses = [];
+    let budget = 0;
+    let categories = [];
+    let users = [];
+    let selectedExpenseIds = [];
+    let selectedSearchIds = [];
+    let editExpenseId = null;
+    let filteredExpenses = [];
 
-        // ----- State -----
-        let expenses = [];
-        let budget = 0;
-        let categories = [];
-        let users = [];
-        let selectedExpenseIds = [];
-        let editExpenseId = null;
+    // Init
+    document.addEventListener('DOMContentLoaded', function() {
+        loadState();
+        populateUserCat();
+        renderBudget();
+        renderExpensesTable();
+        renderCharts();
+        document.getElementById('expenseForm').addEventListener('submit', handleExpenseSubmission);
+        document.getElementById('expDate').valueAsDate = new Date();
+    });
 
-        // ----- Initialization -----
-        document.addEventListener('DOMContentLoaded', function() {
-            loadState();
-            renderBudget();
-            renderExpensesTable();
-            renderCharts();
-            setupTabs();
+    function populateUserCat() {
+        const userSel = document.getElementById('expUser');
+        userSel.innerHTML = users.map(u=>`<option>${u}</option>`).join('');
+        const catSel = document.getElementById('expCategory');
+        catSel.innerHTML = categories.map(c=>`<option>${c}</option>`).join('');
+    }
+
+    // Tabs
+    function showTab(tabName, e) {
+        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        if(e && e.target && e.target.classList.contains('tab-button')) e.target.classList.add('active');
+        else document.querySelector(`.tab-button[onclick*="${tabName}"]`).classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+        if(tabName === 'summary') renderCharts();
+        if(tabName === 'dashboard') renderExpensesTable();
+    }
+
+    // State Management
+    function saveState() {
+        localStorage.setItem(STORAGE.EXPENSES, JSON.stringify(expenses));
+        localStorage.setItem(STORAGE.BUDGET, JSON.stringify(budget));
+        localStorage.setItem(STORAGE.CATEGORIES, JSON.stringify(categories));
+        localStorage.setItem(STORAGE.USERS, JSON.stringify(users));
+    }
+    function loadState() {
+        try {
+            expenses = JSON.parse(localStorage.getItem(STORAGE.EXPENSES)) || [];
+        } catch { expenses = []; }
+        try {
+            budget = JSON.parse(localStorage.getItem(STORAGE.BUDGET)) || 0;
+        } catch { budget = 0; }
+        try {
+            categories = JSON.parse(localStorage.getItem(STORAGE.CATEGORIES)) || DEFAULT_CATEGORIES.slice();
+        } catch { categories = DEFAULT_CATEGORIES.slice(); }
+        try {
+            users = JSON.parse(localStorage.getItem(STORAGE.USERS)) || DEFAULT_USERS.slice();
+        } catch { users = DEFAULT_USERS.slice(); }
+    }
+
+    // Budget
+    function renderBudget() {
+        document.getElementById('totalBudget').textContent = "₹" + budget.toLocaleString("en-IN");
+        const currentMonth = new Date().toISOString().slice(0,7);
+        const spent = expenses.filter(e=>e.date.startsWith(currentMonth)).reduce((t,e)=>t+Number(e.amount),0);
+        document.getElementById('totalSpent').textContent = "₹" + spent.toLocaleString("en-IN");
+        document.getElementById('remainingBudget').textContent = "₹" + (budget-spent).toLocaleString("en-IN");
+        // Progress
+        const percent = budget ? Math.min(100, (spent/budget)*100) : 0;
+        const pf = document.getElementById('budgetProgress');
+        pf.style.width = percent+"%";
+        pf.className = 'progress-fill';
+        if(percent >= 90) pf.classList.add('danger');
+        else if(percent >= 70) pf.classList.add('warning');
+        document.getElementById('progressText').textContent = `Used: ${percent.toFixed(1)}%`;
+    }
+    function setBudget() {
+        let val = parseFloat(document.getElementById('newBudget').value);
+        if(isNaN(val) || val<0) { showToast("Invalid budget", "error"); return;}
+        budget = val;
+        saveState(); renderBudget();
+        document.getElementById('newBudget').value = "";
+        showToast("Budget updated!","success");
+    }
+    function resetBudget() {
+        if(!confirm("Reset budget to zero?")) return;
+        budget = 0;
+        saveState(); renderBudget();
+        showToast("Budget reset.","success");
+    }
+
+    // Add/Edit Expense
+    function handleExpenseSubmission(e) {
+        e.preventDefault();
+        let user = document.getElementById('expUser').value;
+        let cat = document.getElementById('expCategory').value;
+        let vend = document.getElementById('expVendor').value.trim();
+        let amt = parseFloat(document.getElementById('expAmount').value);
+        let date = document.getElementById('expDate').value;
+        let note = document.getElementById('expNote').value.trim();
+        if(!user||!cat||!vend||isNaN(amt)||amt<=0||!date) {
+            showToast("Fill all fields correctly","error"); return;
+        }
+        expenses.push({
+            id: (Date.now()+Math.random()).toString(36),
+            recordedBy: user,
+            category: cat,
+            vendor: vend,
+            amount: amt,
+            date, note,
+            timestamp: Date.now()
         });
-
-        // ----- Tabs -----
-        function setupTabs() {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.onclick = function() {
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
-                    if(tab.getAttribute('data-tab') === 'analytics') renderCharts();
-                    if(tab.getAttribute('data-tab') === 'expenses') renderExpensesTable();
-                    if(tab.getAttribute('data-tab') === 'dashboard') renderBudget();
-                }
-            });
-        }
-
-        // ----- Collapsible Sections -----
-        function toggleCollapsible(el) {
-            const parent = el.closest('.section-collapsible');
-            parent.classList.toggle('active');
-        }
-
-        // ----- State Management -----
-        function saveState() {
-            localStorage.setItem(STORAGE.EXPENSES, JSON.stringify(expenses));
-            localStorage.setItem(STORAGE.BUDGET, JSON.stringify(budget));
-            localStorage.setItem(STORAGE.CATEGORIES, JSON.stringify(categories));
-            localStorage.setItem(STORAGE.USERS, JSON.stringify(users));
-        }
-        function loadState() {
-            try {
-                expenses = JSON.parse(localStorage.getItem(STORAGE.EXPENSES)) || [];
-            } catch { expenses = []; }
-            try {
-                budget = JSON.parse(localStorage.getItem(STORAGE.BUDGET)) || 0;
-            } catch { budget = 0; }
-            try {
-                categories = JSON.parse(localStorage.getItem(STORAGE.CATEGORIES)) || DEFAULT_CATEGORIES.slice();
-            } catch { categories = DEFAULT_CATEGORIES.slice(); }
-            try {
-                users = JSON.parse(localStorage.getItem(STORAGE.USERS)) || DEFAULT_USERS.slice();
-            } catch { users = DEFAULT_USERS.slice(); }
-        }
-
-        // ----- Budget -----
-        function renderBudget() {
-            document.getElementById('totalBudget').textContent = "₹" + budget.toLocaleString("en-IN");
-            const currentMonth = new Date().toISOString().slice(0,7);
-            const spent = expenses.filter(e=>e.date.startsWith(currentMonth)).reduce((t,e)=>t+Number(e.amount),0);
-            document.getElementById('totalSpent').textContent = "₹" + spent.toLocaleString("en-IN");
-            document.getElementById('remainingBudget').textContent = "₹" + (budget-spent).toLocaleString("en-IN");
-            // Progress
-            const percent = budget ? Math.min(100, (spent/budget)*100) : 0;
-            const pf = document.getElementById('budgetProgress');
-            pf.style.width = percent+"%";
-            pf.className = 'progress-fill';
-            if(percent >= 90) pf.classList.add('danger');
-            else if(percent >= 70) pf.classList.add('warning');
-            document.getElementById('progressText').textContent = `Used: ${percent.toFixed(1)}%`;
-        }
-        function setBudget() {
-            let val = parseFloat(document.getElementById('newBudget').value);
-            if(isNaN(val) || val<0) { showToast("Invalid budget", "error"); return;}
-            budget = val;
-            saveState(); renderBudget();
-            document.getElementById('newBudget').value = "";
-            showToast("Budget updated!","success");
-        }
-        function resetBudget() {
-            if(!confirm("Reset budget to zero?")) return;
-            budget = 0;
-            saveState(); renderBudget();
-            showToast("Budget reset.","success");
-        }
-
-        // ----- Expense CRUD -----
-        function openExpenseModal(expense=null) {
-            editExpenseId = expense && expense.id ? expense.id : null;
-            showExpenseModal(expense);
-        }
-
-        function showExpenseModal(expense) {
-            const root = document.getElementById('modalRoot');
-            root.innerHTML = `
-                <div class="modal-backdrop">
-                <div class="modal" id="expenseModal">
-                    <button class="modal-close" onclick="closeModal()"><i class="material-icons">close</i></button>
-                    <div class="modal-header">${expense?"Edit":"Add"} Expense</div>
+        saveState();
+        e.target.reset();
+        document.getElementById('expDate').valueAsDate = new Date();
+        showToast("Expense added!","success");
+        renderExpensesTable(); renderBudget(); renderCharts();
+    }
+    function openEditExpenseModal(id) {
+        const e = expenses.find(exp=>exp.id===id);
+        if(!e) return;
+        editExpenseId = id;
+        showEditExpenseModal(e);
+    }
+    function showEditExpenseModal(e) {
+        document.getElementById('modalRoot').innerHTML = `
+            <div class="modal-backdrop">
+                <div class="modal">
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                    <div class="modal-header">Edit Expense</div>
                     <div class="modal-content">
-                        <div class="form-group">
-                            <label>User</label>
-                            <select id="expUser">${users.map(u=>`<option${expense&&expense.recordedBy===u?" selected":""}>${u}</option>`)}</select>
+                        <div class="form-group"><label>User</label>
+                            <select id="editUser">${users.map(u=>`<option${e.recordedBy===u?" selected":""}>${u}</option>`)}</select>
                         </div>
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select id="expCategory">${categories.map(c=>`<option${expense&&expense.category===c?" selected":""}>${c}</option>`)}</select>
+                        <div class="form-group"><label>Category</label>
+                            <select id="editCategory">${categories.map(c=>`<option${e.category===c?" selected":""}>${c}</option>`)}</select>
                         </div>
-                        <div class="form-group">
-                            <label>Vendor</label>
-                            <input type="text" id="expVendor" value="${expense?escapeHtml(expense.vendor):""}" placeholder="Vendor">
+                        <div class="form-group"><label>Vendor</label>
+                            <input type="text" id="editVendor" value="${e.vendor}">
                         </div>
-                        <div class="form-group">
-                            <label>Amount (₹)</label>
-                            <input type="number" id="expAmount" value="${expense?expense.amount:""}" min="0" step="0.01" placeholder="0.00">
+                        <div class="form-group"><label>Amount (₹)</label>
+                            <input type="number" id="editAmount" value="${e.amount}">
                         </div>
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="expDate" value="${expense?expense.date:todayStr()}">
+                        <div class="form-group"><label>Date</label>
+                            <input type="date" id="editDate" value="${e.date}">
                         </div>
-                        <div class="form-group">
-                            <label>Note (optional)</label>
-                            <textarea id="expNote" rows="2" placeholder="Note">${expense?escapeHtml(expense.note):""}</textarea>
+                        <div class="form-group"><label>Note</label>
+                            <textarea id="editNote" rows="2">${e.note||""}</textarea>
                         </div>
                     </div>
-                    <button class="btn success" onclick="saveExpense()">Save</button>
+                    <button class="btn success" onclick="saveEditExpense()">Save</button>
                 </div>
-                </div>`;
+            </div>`;
+    }
+    function saveEditExpense() {
+        let user = document.getElementById('editUser').value;
+        let cat = document.getElementById('editCategory').value;
+        let vend = document.getElementById('editVendor').value.trim();
+        let amt = parseFloat(document.getElementById('editAmount').value);
+        let date = document.getElementById('editDate').value;
+        let note = document.getElementById('editNote').value.trim();
+        if(!user||!cat||!vend||isNaN(amt)||amt<=0||!date) {
+            showToast("Fill all fields correctly","error"); return;
         }
-        function closeModal() { document.getElementById('modalRoot').innerHTML = "";}
-        function saveExpense() {
-            // Validate
-            let user = document.getElementById('expUser').value;
-            let cat = document.getElementById('expCategory').value;
-            let vend = document.getElementById('expVendor').value.trim();
-            let amt = parseFloat(document.getElementById('expAmount').value);
-            let date = document.getElementById('expDate').value;
-            let note = document.getElementById('expNote').value.trim();
-            if(!user||!cat||!vend||isNaN(amt)||amt<=0||!date) {
-                showToast("Fill all fields correctly","error"); return;
-            }
-            if(editExpenseId) {
-                // Edit
-                let ix = expenses.findIndex(e=>e.id===editExpenseId);
-                if(ix!==-1) {
-                    expenses[ix]={...expenses[ix],recordedBy:user,category:cat,vendor:vend,amount:amt,date,note};
-                }
-                showToast("Expense updated","success");
-            } else {
-                // Add
-                expenses.push({
-                    id: (Date.now()+Math.random()).toString(36),
-                    recordedBy: user,
-                    category: cat,
-                    vendor: vend,
-                    amount: amt,
-                    date, note,
-                    timestamp: Date.now()
-                });
-                showToast("Expense added!","success");
-            }
-            saveState();
-            closeModal();
-            renderBudget(); renderExpensesTable(); renderCharts();
-        }
-        function escapeHtml(txt) { return (txt||"").replace(/[<>&"']/g, m=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#39;"}[m])); }
-        function todayStr() { return (new Date()).toISOString().slice(0,10); }
-
-        // ----- Expenses Table -----
-        function renderExpensesTable() {
-            selectedExpenseIds = [];
-            let tbody = document.querySelector("#expensesTable tbody");
-            let rows = expenses.slice().sort((a,b)=>b.timestamp-a.timestamp).map(e=>compactExpenseRow(e)).join('');
-            if(!rows) rows = `<tr><td colspan="8" style="text-align:center;color:#b91c1c;padding:20px;">No expenses yet.</td></tr>`;
-            tbody.innerHTML = rows;
-            updateSelectedCount();
-        }
-        function compactExpenseRow(e) {
-            return `
-                <tr data-id="${e.id}" class="compact-row${selectedExpenseIds.includes(e.id)?" selected":""}">
-                    <td><input type="checkbox" class="bulk-checkbox" onchange="selectExpense('${e.id}',this)" ${selectedExpenseIds.includes(e.id)?"checked":""}></td>
-                    <td>${formatDate(e.date)}</td>
-                    <td><span class="user-pill">${escapeHtml(e.recordedBy)}</span></td>
-                    <td>${escapeHtml(e.category)}</td>
-                    <td>${escapeHtml(e.vendor)}</td>
-                    <td class="amount">₹${(+e.amount).toLocaleString("en-IN")}</td>
-                    <td class="note" title="${escapeHtml(e.note)}">${escapeHtml(e.note)}</td>
-                    <td class="actions">
-                        <button class="btn small" onclick="openExpenseModal(getExpenseById('${e.id}'))"><i class="material-icons" style="font-size:1.04em;">edit</i></button>
-                        <button class="btn small danger" onclick="deleteExpense('${e.id}')"><i class="material-icons" style="font-size:1.04em;">delete</i></button>
-                    </td>
-                </tr>`;
-        }
-        function getExpenseById(id) { return expenses.find(e=>e.id===id);}
-        function deleteExpense(id) {
-            if(!confirm("Delete this expense?")) return;
-            expenses = expenses.filter(e=>e.id!==id);
-            saveState();
-            renderExpensesTable(); renderBudget(); renderCharts();
-            showToast("Deleted.","success");
-        }
-        function selectExpense(id, cb) {
-            if(cb.checked) selectedExpenseIds.push(id);
-            else selectedExpenseIds = selectedExpenseIds.filter(x=>x!==id);
-            updateSelectedCount();
-        }
-        function toggleSelectAll(cb) {
-            if(cb.checked) {
-                selectedExpenseIds = expenses.map(e=>e.id);
-            } else {
-                selectedExpenseIds = [];
-            }
-            renderExpensesTable();
-            document.getElementById('selectAll').checked = cb.checked;
-        }
-        function updateSelectedCount() {
-            document.getElementById('selectedCount').textContent =
-                selectedExpenseIds.length ? selectedExpenseIds.length+" selected" : "";
-            let all = document.getElementById('selectAll');
-            if(all) all.checked = selectedExpenseIds.length === expenses.length && expenses.length>0;
-        }
-        function deleteSelectedExpenses() {
-            if(selectedExpenseIds.length===0) { showToast("Select expenses first","info"); return;}
-            if(!confirm("Delete "+selectedExpenseIds.length+" selected expenses?")) return;
-            expenses = expenses.filter(e=>!selectedExpenseIds.includes(e.id));
+        let ix = expenses.findIndex(e=>e.id===editExpenseId);
+        if(ix!==-1) {
+            expenses[ix]={...expenses[ix],recordedBy:user,category:cat,vendor:vend,amount:amt,date,note};
             saveState(); renderExpensesTable(); renderBudget(); renderCharts();
-            showToast("Bulk delete done","success");
+            showToast("Expense updated","success");
         }
+        closeModal();
+    }
+    function closeModal() { document.getElementById('modalRoot').innerHTML = ""; }
 
-        // ----- CSV/PDF Export -----
-        function downloadCSV() {
-            if(!expenses.length) { showToast("No data to export","info"); return; }
-            let csv = "Date,User,Category,Vendor,Amount,Note\n"+
-                expenses.map(e=>[
-                    `"${e.date}"`,
-                    `"${e.recordedBy}"`,
-                    `"${e.category}"`,
-                    `"${e.vendor}"`,
-                    e.amount,
-                    `"${(e.note||"").replace(/"/g,'""')}"`
-                ].join(",")).join("\n");
-            let blob = new Blob([csv], { type: 'text/csv' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement("a");
-            a.href = url; a.download = "expenses_"+(new Date().toISOString().slice(0,10))+".csv";
-            document.body.appendChild(a); a.click(); a.remove();
+    // Expenses Table
+    function renderExpensesTable() {
+        selectedExpenseIds = [];
+        let tbody = document.querySelector("#recentExpensesTable tbody");
+        let rows = expenses.slice().sort((a,b)=>b.timestamp-a.timestamp).map(e=>compactExpenseRow(e)).join('');
+        if(!rows) rows = `<tr><td colspan="8" style="text-align:center;color:#b91c1c;padding:20px;">No expenses yet.</td></tr>`;
+        tbody.innerHTML = rows;
+        updateSelectedCount();
+    }
+    function compactExpenseRow(e) {
+        return `
+            <tr data-id="${e.id}" class="compact-row${selectedExpenseIds.includes(e.id)?" selected":""}">
+                <td><input type="checkbox" class="bulk-checkbox" onchange="selectExpense('${e.id}',this)" ${selectedExpenseIds.includes(e.id)?"checked":""}></td>
+                <td>${formatDate(e.date)}</td>
+                <td><span class="user-pill">${e.recordedBy}</span></td>
+                <td>${e.category}</td>
+                <td>${e.vendor}</td>
+                <td class="amount">₹${(+e.amount).toLocaleString("en-IN")}</td>
+                <td class="note" title="${e.note||""}">${e.note||""}</td>
+                <td class="actions">
+                    <button class="btn small" onclick="openEditExpenseModal('${e.id}')">Edit</button>
+                    <button class="btn small danger" onclick="deleteExpense('${e.id}')">Delete</button>
+                </td>
+            </tr>`;
+    }
+    function deleteExpense(id) {
+        if(!confirm("Delete this expense?")) return;
+        expenses = expenses.filter(e=>e.id!==id);
+        saveState();
+        renderExpensesTable(); renderBudget(); renderCharts();
+        showToast("Deleted.","success");
+    }
+    function selectExpense(id, cb) {
+        if(cb.checked) selectedExpenseIds.push(id);
+        else selectedExpenseIds = selectedExpenseIds.filter(x=>x!==id);
+        updateSelectedCount();
+    }
+    function toggleSelectAll(cb) {
+        if(cb.checked) {
+            selectedExpenseIds = expenses.map(e=>e.id);
+        } else {
+            selectedExpenseIds = [];
         }
-        function downloadPDF() {
-            if(!expenses.length) { showToast("No data to export","info"); return; }
-            const { jsPDF } = window.jspdf;
-            let doc = new jsPDF();
-            doc.setFontSize(18); doc.text("Expense Report", 15, 18);
-            doc.setFontSize(12);
-            doc.text(`Total Expenses: ₹${expenses.reduce((s,e)=>s+Number(e.amount),0).toLocaleString("en-IN")}`,15,28);
-            doc.text(`Generated: ${(new Date()).toLocaleDateString("en-IN")}`, 15, 34);
-            doc.autoTable({
-                head: [["Date","User","Category","Vendor","Amount","Note"]],
-                body: expenses.map(e=>[formatDate(e.date),e.recordedBy,e.category,e.vendor,"₹"+(+e.amount).toLocaleString("en-IN"),e.note||""]),
-                startY: 40,
-                styles: { fontSize: 10 },
-                columnStyles: {0:{cellWidth:18},4:{halign:'right'}}
-            });
-            doc.save("expenses_"+(new Date().toISOString().slice(0,10))+".pdf");
-        }
+        renderExpensesTable();
+        document.getElementById('selectAll').checked = cb.checked;
+    }
+    function updateSelectedCount() {
+        document.getElementById('selectedCount').textContent =
+            selectedExpenseIds.length ? selectedExpenseIds.length+" selected" : "";
+        let all = document.getElementById('selectAll');
+        if(all) all.checked = selectedExpenseIds.length === expenses.length && expenses.length>0;
+    }
+    function deleteSelectedExpenses() {
+        if(selectedExpenseIds.length===0) { showToast("Select expenses first","info"); return;}
+        if(!confirm("Delete "+selectedExpenseIds.length+" selected expenses?")) return;
+        expenses = expenses.filter(e=>!selectedExpenseIds.includes(e.id));
+        saveState(); renderExpensesTable(); renderBudget(); renderCharts();
+        showToast("Bulk delete done","success");
+    }
 
-        // ----- Charts & Analytics -----
-        let chartInstances = {};
-        function renderCharts() {
-            // Clean up old charts
-            Object.values(chartInstances).forEach(c=>{try{c.destroy();}catch{}});
-            // Pie: By Category
-            let catAgg = {};
-            expenses.forEach(e=>{catAgg[e.category]= (catAgg[e.category]||0) + Number(e.amount);});
-            let cats = Object.keys(catAgg), catVals = Object.values(catAgg);
-            chartInstances.catPie = new Chart(document.getElementById('categoryPieChart').getContext('2d'), {
-                type:'pie', data:{
-                    labels: cats, datasets: [{data: catVals, backgroundColor: genColors(cats.length)}]
-                },
-                options:{
-                    plugins:{legend:{position:'bottom'}, datalabels:{
-                        color:'#fff', font:{weight:'bold'}, formatter:(v,ctx)=>{
-                            let s = ctx.dataset.data.reduce((a,b)=>a+b,0);
-                            let p = (v/s*100).toFixed(1); return p>6?p+"%":"";
-                        }
-                    }}
-                }, plugins:[ChartDataLabels]
-            });
-            // Monthly Trend
-            let monAgg = {};
-            expenses.forEach(e=>{
-                let m = e.date.slice(0,7); monAgg[m]= (monAgg[m]||0)+Number(e.amount);
-            });
-            let mons = Object.keys(monAgg).sort(), monVals = mons.map(m=>monAgg[m]);
-            chartInstances.monBar = new Chart(document.getElementById('monthlyTrendChart').getContext('2d'),{
-                type:'bar', data:{
-                    labels: mons.map(m=>m.replace("-","/")), datasets:[{label:"Spent (₹)",data:monVals}]
-                },
-                options:{
-                    plugins:{legend:{display:false}},
-                    scales:{y:{beginAtZero:true}},
-                }
-            });
-            // User Spend
-            let userAgg = {};
-            expenses.forEach(e=>{userAgg[e.recordedBy]=(userAgg[e.recordedBy]||0)+Number(e.amount);});
-            let us = Object.keys(userAgg), usVals = Object.values(userAgg);
-            chartInstances.userBar = new Chart(document.getElementById('userSpendingChart').getContext('2d'),{
-                type:'bar', data:{
-                    labels:us, datasets:[{label:"Spent (₹)",data:usVals,backgroundColor:genColors(us.length)}]
-                },
-                options:{
-                    plugins:{legend:{display:false}},
-                    scales:{y:{beginAtZero:true}}
-                }
-            });
-            // Category Count
-            let catCount = {};
-            expenses.forEach(e=>{catCount[e.category]=(catCount[e.category]||0)+1;});
-            let ccats = Object.keys(catCount), ccVals = Object.values(catCount);
-            chartInstances.catCount = new Chart(document.getElementById('categoryCountChart').getContext('2d'),{
-                type:'bar', data:{
-                    labels:ccats, datasets:[{label:"Transactions",data:ccVals,backgroundColor:genColors(ccats.length)}]
-                }, options:{
-                    plugins:{legend:{display:false}},
-                    scales:{y:{beginAtZero:true,stepSize:1}}
-                }
-            });
-        }
-        function genColors(n) {
-            const palette = [
-                "#3b82f6","#6366f1","#f59e42","#ef4444","#10b981","#f472b6","#a21caf",
-                "#06b6d4","#db2777","#facc15","#14b8a6","#f87171","#a3e635","#eab308","#818cf8"
-            ];
-            return Array.from({length:n},(_,i)=>palette[i%palette.length]);
-        }
+    // CSV/PDF Export
+    function downloadCSV() {
+        if(!expenses.length) { showToast("No data to export","info"); return; }
+        let csv = "Date,User,Category,Vendor,Amount,Note\n"+
+            expenses.map(e=>[
+                `"${e.date}"`,
+                `"${e.recordedBy}"`,
+                `"${e.category}"`,
+                `"${e.vendor}"`,
+                e.amount,
+                `"${(e.note||"").replace(/"/g,'""')}"`
+            ].join(",")).join("\n");
+        let blob = new Blob([csv], { type: 'text/csv' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement("a");
+        a.href = url; a.download = "expenses_"+(new Date().toISOString().slice(0,10))+".csv";
+        document.body.appendChild(a); a.click(); a.remove();
+    }
+    function downloadPDF() {
+        if(!expenses.length) { showToast("No data to export","info"); return; }
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF();
+        doc.setFontSize(18); doc.text("Expense Report", 15, 18);
+        doc.setFontSize(12);
+        doc.text(`Total Expenses: ₹${expenses.reduce((s,e)=>s+Number(e.amount),0).toLocaleString("en-IN")}`,15,28);
+        doc.text(`Generated: ${(new Date()).toLocaleDateString("en-IN")}`, 15, 34);
+        doc.autoTable({
+            head: [["Date","User","Category","Vendor","Amount","Note"]],
+            body: expenses.map(e=>[formatDate(e.date),e.recordedBy,e.category,e.vendor,"₹"+(+e.amount).toLocaleString("en-IN"),e.note||""]),
+            startY: 40,
+            styles: { fontSize: 10 },
+            columnStyles: {0:{cellWidth:18},4:{halign:'right'}}
+        });
+        doc.save("expenses_"+(new Date().toISOString().slice(0,10))+".pdf");
+    }
 
-        // ----- Categories/Users -----
-        function openCategoryModal() {
-            showModal("Edit Categories", categories.map((cat,i)=>`
-                <span class="category-chip">${escapeHtml(cat)} <span class="chip-remove" onclick="removeCategory(${i})">&times;</span></span>
-            `).join('')+`
-                <div class="form-row">
-                    <input id="catAddInput" placeholder="Add new category..." onkeydown="if(event.key==='Enter'){addCategory()}">
-                    <button class="btn small" onclick="addCategory()">Add</button>
+    // Analytics & Charts
+    let chartInstances = {};
+    function renderCharts() {
+        Object.values(chartInstances).forEach(c=>{try{c.destroy();}catch{}});
+        // Pie: By Category
+        let catAgg = {};
+        expenses.forEach(e=>{catAgg[e.category]= (catAgg[e.category]||0) + Number(e.amount);});
+        let cats = Object.keys(catAgg), catVals = Object.values(catAgg);
+        chartInstances.catPie = new Chart(document.getElementById('categoryPieChart').getContext('2d'), {
+            type:'pie', data:{
+                labels: cats, datasets: [{data: catVals, backgroundColor: genColors(cats.length)}]
+            },
+            options:{
+                plugins:{legend:{position:'bottom'}, datalabels:{
+                    color:'#fff', font:{weight:'bold'}, formatter:(v,ctx)=>{
+                        let s = ctx.dataset.data.reduce((a,b)=>a+b,0);
+                        let p = (v/s*100).toFixed(1); return p>6?p+"%":"";
+                    }
+                }}
+            }, plugins:[ChartDataLabels]
+        });
+        // Monthly Trend
+        let monAgg = {};
+        expenses.forEach(e=>{
+            let m = e.date.slice(0,7); monAgg[m]= (monAgg[m]||0)+Number(e.amount);
+        });
+        let mons = Object.keys(monAgg).sort(), monVals = mons.map(m=>monAgg[m]);
+        chartInstances.monBar = new Chart(document.getElementById('monthlyTrendChart').getContext('2d'),{
+            type:'bar', data:{
+                labels: mons.map(m=>m.replace("-","/")), datasets:[{label:"Spent (₹)",data:monVals}]
+            },
+            options:{
+                plugins:{legend:{display:false}},
+                scales:{y:{beginAtZero:true}},
+            }
+        });
+        // User Spend
+        let userAgg = {};
+        expenses.forEach(e=>{userAgg[e.recordedBy]=(userAgg[e.recordedBy]||0)+Number(e.amount);});
+        let us = Object.keys(userAgg), usVals = Object.values(userAgg);
+        chartInstances.userBar = new Chart(document.getElementById('userSpendingChart').getContext('2d'),{
+            type:'bar', data:{
+                labels:us, datasets:[{label:"Spent (₹)",data:usVals,backgroundColor:genColors(us.length)}]
+            },
+            options:{
+                plugins:{legend:{display:false}},
+                scales:{y:{beginAtZero:true}}
+            }
+        });
+        // Category Count
+        let catCount = {};
+        expenses.forEach(e=>{catCount[e.category]=(catCount[e.category]||0)+1;});
+        let ccats = Object.keys(catCount), ccVals = Object.values(catCount);
+        chartInstances.catCount = new Chart(document.getElementById('categoryCountChart').getContext('2d'),{
+            type:'bar', data:{
+                labels:ccats, datasets:[{label:"Transactions",data:ccVals,backgroundColor:genColors(ccats.length)}]
+            }, options:{
+                plugins:{legend:{display:false}},
+                scales:{y:{beginAtZero:true,stepSize:1}}
+            }
+        });
+    }
+    function genColors(n) {
+        const palette = [
+            "#3b82f6","#6366f1","#f59e42","#ef4444","#10b981","#f472b6","#a21caf",
+            "#06b6d4","#db2777","#facc15","#14b8a6","#f87171","#a3e635","#eab308","#818cf8"
+        ];
+        return Array.from({length:n},(_,i)=>palette[i%palette.length]);
+    }
+
+    // Search & Filter
+    function searchExpenses() {
+        const searchText = document.getElementById('searchText').value.toLowerCase().trim();
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        filteredExpenses = expenses.filter(expense => {
+            const matchesSearch = !searchText || 
+                expense.vendor.toLowerCase().includes(searchText) ||
+                expense.category.toLowerCase().includes(searchText) ||
+                (expense.note && expense.note.toLowerCase().includes(searchText)) ||
+                expense.recordedBy.toLowerCase().includes(searchText);
+            const matchesStartDate = !startDate || expense.date >= startDate;
+            const matchesEndDate = !endDate || expense.date <= endDate;
+            return matchesSearch && matchesStartDate && matchesEndDate;
+        });
+        renderSearchResults();
+    }
+    function clearFilters() {
+        document.getElementById('searchText').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
+        filteredExpenses = [];
+        renderSearchResults();
+    }
+    function renderSearchResults() {
+        selectedSearchIds = [];
+        let tbody = document.querySelector("#searchResultsTable tbody");
+        let arr = filteredExpenses.length ? filteredExpenses : [];
+        let rows = arr.length ? arr.map(e=>`
+            <tr>
+                <td><input type="checkbox" class="bulk-checkbox" onchange="selectSearchExpense('${e.id}',this)" ${selectedSearchIds.includes(e.id)?"checked":""}></td>
+                <td>${formatDate(e.date)}</td>
+                <td><span class="user-pill">${e.recordedBy}</span></td>
+                <td>${e.category}</td>
+                <td>${e.vendor}</td>
+                <td class="amount">₹${(+e.amount).toLocaleString("en-IN")}</td>
+                <td class="note" title="${e.note||""}">${e.note||""}</td>
+                <td>
+                    <button class="btn small" onclick="openEditExpenseModal('${e.id}')">Edit</button>
+                    <button class="btn small danger" onclick="deleteExpense('${e.id}')">Delete</button>
+                </td>
+            </tr>
+        `).join('') : `<tr><td colspan="8" style="text-align:center;color:#999;padding:17px;">No results</td></tr>`;
+        tbody.innerHTML = rows;
+        updateSearchSelectedCount();
+    }
+    function selectSearchExpense(id, cb) {
+        if(cb.checked) selectedSearchIds.push(id);
+        else selectedSearchIds = selectedSearchIds.filter(x=>x!==id);
+        updateSearchSelectedCount();
+    }
+    function toggleSearchSelectAll(cb) {
+        if(cb.checked && filteredExpenses.length) {
+            selectedSearchIds = filteredExpenses.map(e=>e.id);
+        } else {
+            selectedSearchIds = [];
+        }
+        renderSearchResults();
+        document.getElementById('searchSelectAll').checked = cb.checked;
+    }
+    function updateSearchSelectedCount() {
+        document.getElementById('searchSelectedCount').textContent =
+            selectedSearchIds.length ? selectedSearchIds.length+" selected" : "";
+        let all = document.getElementById('searchSelectAll');
+        if(all && filteredExpenses.length)
+            all.checked = selectedSearchIds.length === filteredExpenses.length && filteredExpenses.length>0;
+    }
+    function downloadFilteredCSV() {
+        let arr = filteredExpenses.length ? filteredExpenses : [];
+        if(!arr.length) { showToast("No data to export","info"); return; }
+        let csv = "Date,User,Category,Vendor,Amount,Note\n"+
+            arr.map(e=>[
+                `"${e.date}"`,
+                `"${e.recordedBy}"`,
+                `"${e.category}"`,
+                `"${e.vendor}"`,
+                e.amount,
+                `"${(e.note||"").replace(/"/g,'""')}"`
+            ].join(",")).join("\n");
+        let blob = new Blob([csv], { type: 'text/csv' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement("a");
+        a.href = url; a.download = "filtered_expenses_"+(new Date().toISOString().slice(0,10))+".csv";
+        document.body.appendChild(a); a.click(); a.remove();
+    }
+    function downloadFilteredPDF() {
+        let arr = filteredExpenses.length ? filteredExpenses : [];
+        if(!arr.length) { showToast("No data to export","info"); return; }
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF();
+        doc.setFontSize(18); doc.text("Filtered Expenses", 15, 18);
+        doc.setFontSize(12);
+        doc.text(`Total: ₹${arr.reduce((s,e)=>s+Number(e.amount),0).toLocaleString("en-IN")}`,15,28);
+        doc.text(`Generated: ${(new Date()).toLocaleDateString("en-IN")}`, 15, 34);
+        doc.autoTable({
+            head: [["Date","User","Category","Vendor","Amount","Note"]],
+            body: arr.map(e=>[formatDate(e.date),e.recordedBy,e.category,e.vendor,"₹"+(+e.amount).toLocaleString("en-IN"),e.note||""]),
+            startY: 40,
+            styles: { fontSize: 10 },
+            columnStyles: {0:{cellWidth:18},4:{halign:'right'}}
+        });
+        doc.save("filtered_expenses_"+(new Date().toISOString().slice(0,10))+".pdf");
+    }
+
+    // Settings: Categories/Users
+    function openSettingsModal() {
+        document.getElementById('modalRoot').innerHTML = `
+            <div class="modal-backdrop">
+                <div class="modal">
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                    <div class="modal-header">Manage Categories & Users</div>
+                    <div class="modal-content">
+                        <div><b>Categories:</b><br>
+                            ${categories.map((cat,i)=>`
+                                <span class="category-chip">${cat} <span class="chip-remove" onclick="removeCategory(${i})">&times;</span></span>
+                            `).join('')}
+                        </div>
+                        <div class="form-row">
+                            <input id="catAddInput" placeholder="Add new category..." onkeydown="if(event.key==='Enter'){addCategory()}">
+                            <button class="btn small" onclick="addCategory()">Add</button>
+                        </div>
+                        <hr style="margin:12px 0;">
+                        <div><b>Users:</b><br>
+                            ${users.map((u,i)=>`
+                                <span class="user-chip">${u} <span class="chip-remove" onclick="removeUser(${i})">&times;</span></span>
+                            `).join('')}
+                        </div>
+                        <div class="form-row">
+                            <input id="userAddInput" placeholder="Add new user..." onkeydown="if(event.key==='Enter'){addUser()}">
+                            <button class="btn small" onclick="addUser()">Add</button>
+                        </div>
+                    </div>
                 </div>
-            `, null, "catModal");
-        }
-        function addCategory() {
-            let inp = document.getElementById('catAddInput');
-            let val = (inp.value||"").trim();
-            if(!val) return;
-            if(categories.includes(val)) { showToast("Exists","info"); return;}
-            categories.push(val);
-            saveState(); closeModal(); openCategoryModal();
-        }
-        function removeCategory(i) {
-            if(categories.length<=1) { showToast("Need at least one","info"); return;}
-            if(!confirm("Delete category?")) return;
-            let cat = categories[i];
-            expenses = expenses.filter(e=>e.category!==cat);
-            categories.splice(i,1);
-            saveState(); closeModal(); openCategoryModal(); renderExpensesTable(); renderCharts();
-        }
-        function openUserModal() {
-            showModal("Edit Users", users.map((u,i)=>`
-                <span class="user-chip">${escapeHtml(u)} <span class="chip-remove" onclick="removeUser(${i})">&times;</span></span>
-            `).join('')+`
-                <div class="form-row">
-                    <input id="userAddInput" placeholder="Add new user..." onkeydown="if(event.key==='Enter'){addUser()}">
-                    <button class="btn small" onclick="addUser()">Add</button>
-                </div>
-            `, null, "userModal");
-        }
-        function addUser() {
-            let inp = document.getElementById('userAddInput');
-            let val = (inp.value||"").trim();
-            if(!val) return;
-            if(users.includes(val)) { showToast("Exists","info"); return;}
-            users.push(val);
-            saveState(); closeModal(); openUserModal();
-        }
-        function removeUser(i) {
-            if(users.length<=1) { showToast("Need at least one","info"); return;}
-            if(!confirm("Delete user?")) return;
-            let user = users[i];
-            expenses = expenses.filter(e=>e.recordedBy!==user);
-            users.splice(i,1);
-            saveState(); closeModal(); openUserModal(); renderExpensesTable(); renderCharts();
-        }
+            </div>`;
+    }
+    function addCategory() {
+        let inp = document.getElementById('catAddInput');
+        let val = (inp.value||"").trim();
+        if(!val) return;
+        if(categories.includes(val)) { showToast("Exists","info"); return;}
+        categories.push(val);
+        saveState(); closeModal(); openSettingsModal(); populateUserCat();
+    }
+    function removeCategory(i) {
+        if(categories.length<=1) { showToast("Need at least one","info"); return;}
+        if(!confirm("Delete category?")) return;
+        let cat = categories[i];
+        expenses = expenses.filter(e=>e.category!==cat);
+        categories.splice(i,1);
+        saveState(); closeModal(); openSettingsModal(); renderExpensesTable(); renderCharts(); populateUserCat();
+    }
+    function addUser() {
+        let inp = document.getElementById('userAddInput');
+        let val = (inp.value||"").trim();
+        if(!val) return;
+        if(users.includes(val)) { showToast("Exists","info"); return;}
+        users.push(val);
+        saveState(); closeModal(); openSettingsModal(); populateUserCat();
+    }
+    function removeUser(i) {
+        if(users.length<=1) { showToast("Need at least one","info"); return;}
+        if(!confirm("Delete user?")) return;
+        let user = users[i];
+        expenses = expenses.filter(e=>e.recordedBy!==user);
+        users.splice(i,1);
+        saveState(); closeModal(); openSettingsModal(); renderExpensesTable(); renderCharts(); populateUserCat();
+    }
 
-        // ----- Modal Reuse -----
-        function showModal(title, content, saveCb, id) {
-            document.getElementById('modalRoot').innerHTML =
-                `<div class="modal-backdrop"><div class="modal" id="${id||''}">
-                    <button class="modal-close" onclick="closeModal()"><i class="material-icons">close</i></button>
-                    <div class="modal-header">${title}</div>
-                    <div class="modal-content">${content}</div>
-                </div></div>`;
-        }
-
-        // ----- Toast/Message -----
-        function showToast(msg, type="success") {
-            let t = document.getElementById('toast');
-            t.innerHTML = `<div class="toast ${type}">${msg}</div>`;
-            setTimeout(()=>{t.innerHTML='';},2200);
-        }
-
-        // ----- Date Utility -----
-        function formatDate(str) {
-            if(!str) return "";
-            let [y,m,d]=str.split('-');
-            return [d,m,y].join('-');
-        }
-    </script>
+    // Toast/Message
+    function showToast(msg, type="success") {
+        let t = document.getElementById('toast');
+        t.innerHTML = `<div class="toast ${type}">${msg}</div>`;
+        setTimeout(()=>{t.innerHTML='';},2000);
+    }
+    // Date Utility
+    function formatDate(str) {
+        if(!str) return "";
+        let [y,m,d]=str.split('-');
+        return [d,m,y].join('-');
+    }
+</script>
 </body>
 </html>
